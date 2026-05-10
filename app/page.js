@@ -1,34 +1,93 @@
 import { supabase } from '../lib/supabase'
+import Navbar from '../components/Navbar'
 
 export default async function Home() {
-  const { data: restaurants, error } = await supabase
+  const { data: restaurants } = await supabase
     .from('restaurants')
     .select('*')
     .order('id')
 
-  if (error) {
-    return <div>Hata: {error.message}</div>
-  }
-
   return (
-    <main style={{padding: '40px', fontFamily: 'sans-serif'}}>
-      <h1 style={{fontSize: '2rem', marginBottom: '24px'}}>
-        bizzat<span style={{color: '#F55D00'}}>ankara</span>
-      </h1>
-      <p style={{color: '#666', marginBottom: '24px'}}>
-        {restaurants?.length} mekan yüklendi ✓
-      </p>
-      <ul style={{listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '12px'}}>
-        {restaurants?.map(r => (
-          <li key={r.id} style={{
-            padding: '16px', background: '#FAF7F2',
-            borderRadius: '10px', border: '1px solid #E8DDD0'
+    <>
+      <Navbar />
+      <main style={{paddingTop: '64px'}}>
+        <section style={{
+          minHeight: '100vh',
+          display: 'flex', flexDirection: 'column',
+          justifyContent: 'center', padding: '80px',
+          background: 'var(--cream)',
+        }}>
+          <div style={{
+            fontSize: '0.78rem', fontWeight: 500,
+            letterSpacing: '0.1em', textTransform: 'uppercase',
+            color: 'var(--rust)', marginBottom: '28px',
+            display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <strong>{r.emoji} {r.name}</strong>
-            <span style={{color: '#999', marginLeft: '12px'}}>{r.area}</span>
-          </li>
-        ))}
-      </ul>
-    </main>
+            <span style={{width:'28px',height:'1px',background:'var(--rust)',display:'inline-block'}}/>
+            Ankara Rehberi
+          </div>
+
+          <h1 style={{
+            fontFamily: 'var(--font-playfair)',
+            fontSize: 'clamp(2.8rem, 5vw, 4.2rem)',
+            lineHeight: 1.1, color: 'var(--dark)',
+            marginBottom: '24px',
+          }}>
+            Ankara'yı<br />
+            <em style={{color: 'var(--rust)', fontStyle: 'italic'}}>bizzat</em><br />
+            keşfet
+          </h1>
+
+          <p style={{
+            fontSize: '1.05rem', color: 'var(--text-muted)',
+            lineHeight: 1.7, maxWidth: '420px', marginBottom: '44px',
+          }}>
+            Şehrin en iyi restoranları, gizli kalmış mekanları ve yerel lezzetleri — hepsi tek bir rehberde.
+          </p>
+
+          <div style={{display: 'flex', gap: '16px', alignItems: 'center'}}>
+            <a href="#harita" style={{
+              background: 'var(--dark)', color: '#fff',
+              padding: '14px 32px', borderRadius: '100px',
+              fontSize: '0.9rem', fontWeight: 500,
+              textDecoration: 'none',
+            }}>
+              Haritayı Gör
+            </a>
+            <a href="#blog" style={{
+              color: 'var(--text-muted)', fontSize: '0.9rem',
+              textDecoration: 'none',
+            }}>
+              Blog'u oku →
+            </a>
+          </div>
+
+          <div style={{
+            display: 'flex', gap: '40px',
+            marginTop: '60px', paddingTop: '40px',
+            borderTop: '1px solid var(--border)',
+          }}>
+            {[
+              {num: '54K', label: 'Takipçi'},
+              {num: '2 Yıl', label: 'İçerik Üretimi'},
+              {num: `${restaurants?.length || 0}`, label: 'Anlaşmalı Mekan'},
+            ].map(s => (
+              <div key={s.label}>
+                <span style={{
+                  fontFamily: 'var(--font-playfair)',
+                  fontSize: '2rem', fontWeight: 700,
+                  color: 'var(--dark)', display: 'block',
+                }}>
+                  {s.num}
+                </span>
+                <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>
+                  {s.label}
+                </span>
+              </div>
+            ))}
+          </div>
+        </section>
+      </main>
+    </>
   )
 }
