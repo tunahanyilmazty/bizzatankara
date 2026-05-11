@@ -1,5 +1,6 @@
 import { supabase } from '../lib/supabase'
 import Navbar from '../components/Navbar'
+import MapWrapper from '../components/MapWrapper'
 
 export default async function Home() {
   const { data: restaurants } = await supabase
@@ -11,6 +12,8 @@ export default async function Home() {
     <>
       <Navbar />
       <main style={{paddingTop: '64px'}}>
+
+        {/* HERO */}
         <section style={{
           minHeight: '100vh',
           display: 'flex', flexDirection: 'column',
@@ -33,7 +36,7 @@ export default async function Home() {
             lineHeight: 1.1, color: 'var(--dark)',
             marginBottom: '24px',
           }}>
-            Ankara'yı<br />
+            Ankara&apos;yı<br />
             <em style={{color: 'var(--rust)', fontStyle: 'italic'}}>bizzat</em><br />
             keşfet
           </h1>
@@ -58,7 +61,7 @@ export default async function Home() {
               color: 'var(--text-muted)', fontSize: '0.9rem',
               textDecoration: 'none',
             }}>
-              Blog'u oku →
+              Blog&apos;u oku →
             </a>
           </div>
 
@@ -87,6 +90,28 @@ export default async function Home() {
             ))}
           </div>
         </section>
+
+        {/* HARİTA */}
+        <section id="harita" style={{background: '#fff'}}>
+          <div style={{padding: '60px 80px 32px'}}>
+            <span style={{
+              fontSize: '0.75rem', letterSpacing: '0.12em',
+              textTransform: 'uppercase', color: 'var(--rust)',
+              fontWeight: 500, display: 'block', marginBottom: '12px',
+            }}>
+              Anlaşmalı Mekanlar
+            </span>
+            <h2 style={{
+              fontFamily: 'var(--font-playfair)',
+              fontSize: 'clamp(2rem, 3.5vw, 3rem)',
+              color: 'var(--dark)',
+            }}>
+              Haritadan <em style={{color: 'var(--rust)', fontStyle: 'italic'}}>Bul</em>
+            </h2>
+          </div>
+          <MapWrapper restaurants={restaurants} />
+        </section>
+
       </main>
     </>
   )
