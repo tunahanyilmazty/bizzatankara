@@ -1,12 +1,32 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { supabase } from '../lib/supabase'
+import AuthModal from './AuthModal'
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
+  const [authOpen, setAuthOpen] = useState(false)
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+    })
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    setUser(null)
+  }
 
   const links = ['Harita', 'Kategoriler', 'Yorumlar', 'Blog']
+  const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || ''
 
   return (
     <>
@@ -25,7 +45,7 @@ export default function Navbar() {
           bizzat<span style={{color: 'var(--rust)'}}>ankara</span>
         </Link>
 
-        <ul style={{display: 'flex', gap: '32px', listStyle: 'none'}}>
+        <ul style={{display: 'flex', gap: '32px', listStyle: 'none', alignItems: 'center'}}>
           {links.map(item => (
             <li key={item}>
               <Link href={'/#' + item.toLowerCase()} style={{
@@ -43,8 +63,42 @@ export default function Navbar() {
               padding: '8px 20px', borderRadius: '100px',
               textDecoration: 'none', fontSize: '0.88rem',
             }}>
-              Is Birligi
+              İş Birliği
             </Link>
+          </li>
+          <li>
+            {user ? (
+              <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+                <div style={{
+                  width: '28px', height: '28px', borderRadius: '50%',
+                  background: 'var(--rust)', color: '#fff',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: '0.72rem', fontWeight: 600,
+                }}>
+                  {userName.charAt(0).toUpperCase()}
+                </div>
+                <span style={{fontSize: '0.85rem', color: 'var(--text-muted)'}}>
+                  {userName}
+                </span>
+                <button onClick={handleLogout} style={{
+                  padding: '7px 18px', borderRadius: '100px',
+                  border: '1.5px solid var(--border)', background: 'none',
+                  fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer',
+                  fontFamily: 'inherit',
+                }}>
+                  Çıkış
+                </button>
+              </div>
+            ) : (
+              <button onClick={() => setAuthOpen(true)} style={{
+                padding: '7px 18px', borderRadius: '100px',
+                border: '1.5px solid var(--border)', background: 'none',
+                fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer',
+                fontFamily: 'inherit',
+              }}>
+                Giriş Yap
+              </button>
+            )}
           </li>
         </ul>
 
@@ -83,7 +137,33 @@ export default function Navbar() {
               {item}
             </Link>
           ))}
+          {user ? (
+            <button onClick={handleLogout} style={{
+              display: 'block', padding: '14px 0',
+              fontSize: '1.1rem', color: 'var(--rust)',
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}>
+              Çıkış Yap
+            </button>
+          ) : (
+            <button onClick={() => { setMenuOpen(false); setAuthOpen(true) }} style={{
+              display: 'block', padding: '14px 0',
+              fontSize: '1.1rem', color: 'var(--rust)',
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontFamily: 'inherit',
+            }}>
+              Giriş Yap
+            </button>
+          )}
         </div>
+      )}
+
+      {authOpen && (
+        <AuthModal
+          onClose={() => setAuthOpen(false)}
+          onSuccess={(u) => setUser(u)}
+        />
       )}
     </>
   )
