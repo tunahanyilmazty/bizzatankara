@@ -1,6 +1,7 @@
 import { supabase } from '../lib/supabase'
 import Navbar from '../components/Navbar'
 import MapWrapper from '../components/MapWrapper'
+import Reviews from '../components/Reviews'
 
 export default async function Home() {
   const { data: restaurants } = await supabase
@@ -111,7 +112,8 @@ export default async function Home() {
           </div>
           <MapWrapper restaurants={restaurants} />
         </section>
-
+{/* YORUMLAR */}
+        <Reviews restaurants={restaurants} />
       </main>
     </>
   )
