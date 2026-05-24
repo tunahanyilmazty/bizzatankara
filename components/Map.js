@@ -3,6 +3,57 @@
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
+function useFavorites() {
+  const [favorites, setFavorites] = useState(new Set())
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null)
+      if (session?.user) loadFavorites(session.user.id)
+    })
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      if (session?.user) loadFavorites(session.user.id)
+      else setFavorites(new Set())
+    })
+
+    return () => subscription.unsubscribe()
+  }, [])
+
+  async function loadFavorites(userId) {
+    const { data } = await supabase
+      .from('favorites')
+      .select('restaurant_id')
+      .eq('user_id', userId)
+    if (data) setFavorites(new Set(data.map(f => f.restaurant_id)))
+  }
+
+  async function toggleFavorite(restaurantId) {
+    if (!user) return false
+    if (favorites.has(restaurantId)) {
+      await supabase.from('favorites').delete()
+        .eq('user_id', user.id)
+        .eq('restaurant_id', restaurantId)
+      setFavorites(prev => {
+        const next = new Set(prev)
+        next.delete(restaurantId)
+        return next
+      })
+    } else {
+      await supabase.from('favorites').insert({
+        user_id: user.id,
+        restaurant_id: restaurantId,
+      })
+      setFavorites(prev => new Set([...prev, restaurantId]))
+    }
+    return true
+  }
+
+  return { favorites, toggleFavorite, user }
+}
+
 export default function Map({ restaurants }) {
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
@@ -14,6 +65,7 @@ export default function Map({ restaurants }) {
   const [activeId, setActiveId] = useState(null)
   const [activeTag, setActiveTag] = useState('hepsi')
   const userMarkerRef = useRef(null)
+  const { favorites, toggleFavorite, user } = useFavorites()
 
   useEffect(() => {
     fetchReviewCounts()
@@ -45,6 +97,7 @@ export default function Map({ restaurants }) {
   }
 
   function getFiltered(list) {
+    if (activeTag === 'favoriler') return list.filter(r => favorites.has(r.id))
     if (activeTag === 'hepsi') return list
     return list.filter(r => r.tags?.includes(activeTag))
   }
@@ -183,25 +236,24 @@ export default function Map({ restaurants }) {
     return () => { delete window.openRestaurantReviews }
   }, [restaurants])
 
-  const tags = ['hepsi', 'kahvaltı', 'öğle', 'akşam', 'kafe']
+  const tags = ['hepsi', 'kahvaltı', 'öğle', 'akşam', 'kafe', 'favoriler']
   const displayList = getFiltered(sortedRestaurants)
   const colors = ['#F55D00', '#2A7A4A', '#1A6BB5', '#8A4FB5', '#C94A00', '#2A5A7A']
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', minHeight: '700px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', height: '700px' }}>
 
         {/* SOL PANEL */}
-        <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', height: '700px' }}>
+        <div style={{ background: '#fff', borderRight: '1px solid #E8DDD0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+
           {/* Header */}
           <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #E8DDD0' }}>
             <h3 style={{ fontFamily: 'var(--font-playfair)', fontSize: '1.3rem', color: '#1A1208', marginBottom: '4px' }}>
               Mekanlar
             </h3>
             <p style={{ fontSize: '0.78rem', color: '#7A6A5A' }}>
-              {located
-                ? `Konumuna göre sıralandı`
-                : 'Tıkla, haritada bul'}
+              {located ? 'Konumuna göre sıralandı' : 'Tıkla, haritada bul'}
             </p>
             <button
               onClick={locateUser}
@@ -225,24 +277,38 @@ export default function Map({ restaurants }) {
             {tags.map(tag => (
               <button
                 key={tag}
-                onClick={() => setActiveTag(tag)}
+                onClick={() => {
+                  if (tag === 'favoriler' && !user) {
+                    alert('Favorileri görmek için giriş yapman gerekiyor.')
+                    return
+                  }
+                  setActiveTag(tag)
+                }}
                 style={{
                   padding: '5px 12px', borderRadius: '100px',
                   fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
                   whiteSpace: 'nowrap', fontFamily: 'inherit',
-                  background: activeTag === tag ? '#F55D00' : 'none',
-                  color: activeTag === tag ? '#fff' : '#7A6A5A',
-                  border: activeTag === tag ? '1px solid #F55D00' : '1px solid #E8DDD0',
+                  background: activeTag === tag ? (tag === 'favoriler' ? '#E8445A' : '#F55D00') : 'none',
+                  color: activeTag === tag ? '#fff' : (tag === 'favoriler' ? '#E8445A' : '#7A6A5A'),
+                  border: activeTag === tag
+                    ? (tag === 'favoriler' ? '1px solid #E8445A' : '1px solid #F55D00')
+                    : (tag === 'favoriler' ? '1px solid #FDDDE2' : '1px solid #E8DDD0'),
                 }}
               >
-                {tag.charAt(0).toUpperCase() + tag.slice(1)}
+                {tag === 'favoriler' ? '♥ Favorilerim' : tag.charAt(0).toUpperCase() + tag.slice(1)}
               </button>
             ))}
           </div>
 
           {/* Mekan listesi */}
           <div style={{ overflowY: 'auto', flex: 1 }}>
-            {displayList.map(r => (
+            {displayList.length === 0 && activeTag === 'favoriler' ? (
+              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#7A6A5A' }}>
+                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>♡</div>
+                <div style={{ fontSize: '0.88rem' }}>Henüz favori eklemedin.</div>
+                <div style={{ fontSize: '0.78rem', marginTop: '6px', opacity: 0.7 }}>Mekan listesindeki kalp ikonuna tıkla.</div>
+              </div>
+            ) : displayList.map(r => (
               <div
                 key={r.id}
                 onClick={() => selectRestaurant(r)}
@@ -281,13 +347,29 @@ export default function Map({ restaurants }) {
                     ))}
                   </div>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px', flexShrink: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
                   <div style={{ fontSize: '0.75rem', color: '#C94A00', fontWeight: 500 }}>{r.rating}</div>
                   {r.distance != null && (
                     <div style={{ fontSize: '0.7rem', color: '#F55D00', fontWeight: 600 }}>
                       {fmtDist(r.distance)}
                     </div>
                   )}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      if (!user) { alert('Favori eklemek için giriş yapman gerekiyor.'); return }
+                      toggleFavorite(r.id)
+                    }}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      fontSize: '1.1rem',
+                      color: favorites.has(r.id) ? '#E8445A' : '#D0C4B8',
+                      padding: '2px',
+                    }}
+                    title={favorites.has(r.id) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
+                  >
+                    {favorites.has(r.id) ? '♥' : '♡'}
+                  </button>
                 </div>
               </div>
             ))}
