@@ -94,7 +94,7 @@ export default async function Home() {
         </section>
 
         {/* HARİTA */}
-        <section id="harita" style={{background: '#fff'}}>
+        <section id="harita" style={{background: '#fff', overflow: 'hidden'}}>
           <div style={{padding: '60px 80px 32px'}}>
             <span style={{
               fontSize: '0.75rem', letterSpacing: '0.12em',
