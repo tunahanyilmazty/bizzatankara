@@ -21,8 +21,30 @@ const playfair = Playfair_Display({
 })
 
 export const metadata = {
-  title: 'bizzatankara — Ankara\'yı Keşfet',
-  description: 'Ankara\'nın en iyi restoranları, gizli mekanları ve yerel lezzetleri.',
+  title: {
+    default: 'bizzatankara — Ankara\'yı Keşfet',
+    template: '%s — bizzatankara',
+  },
+  description: 'Ankara\'nın en iyi restoranları, gizli mekanları ve yerel lezzetleri. 54K takipçili bizzatankara ile şehri keşfet.',
+  keywords: ['Ankara restoran', 'Ankara yemek', 'Ankara mekan rehberi', 'bizzatankara'],
+  authors: [{ name: 'bizzatankara' }],
+  creator: 'bizzatankara',
+  openGraph: {
+    type: 'website',
+    locale: 'tr_TR',
+    url: 'https://bizzatankara.com',
+    siteName: 'bizzatankara',
+    title: 'bizzatankara — Ankara\'yı Keşfet',
+    description: 'Ankara\'nın en iyi restoranları, gizli mekanları ve yerel lezzetleri.',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'bizzatankara — Ankara\'yı Keşfet',
+    description: 'Ankara\'nın en iyi restoranları, gizli mekanları ve yerel lezzetleri.',
+  },
+  alternates: {
+    canonical: 'https://bizzatankara.com',
+  },
 }
 
 export default function RootLayout({ children }) {

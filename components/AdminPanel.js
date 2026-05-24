@@ -8,8 +8,14 @@ export default function AdminPanel() {
   const [open, setOpen] = useState(false)
   const [pendingReviews, setPendingReviews] = useState([])
   const [restaurants, setRestaurants] = useState([])
+  const [blogPosts, setBlogPosts] = useState([])
   const [tab, setTab] = useState('yorumlar')
   const [restaurantReviews, setRestaurantReviews] = useState({})
+
+  // Blog form state
+  const [editingPost, setEditingPost] = useState(null)
+  const [newPost, setNewPost] = useState({ title: '', excerpt: '', category: '', emoji: '', thumb_class: 't1', read_time: '5 dk okuma' })
+  const [showNewPost, setShowNewPost] = useState(false)
 
   useEffect(() => {
     checkAdmin()
@@ -29,6 +35,7 @@ export default function AdminPanel() {
       setIsAdmin(true)
       fetchPending()
       fetchRestaurants()
+      fetchBlogPosts()
     }
 
     supabase.auth.onAuthStateChange(async (_event, session) => {
@@ -42,6 +49,7 @@ export default function AdminPanel() {
         setIsAdmin(true)
         fetchPending()
         fetchRestaurants()
+        fetchBlogPosts()
       } else {
         setIsAdmin(false)
       }
@@ -65,6 +73,14 @@ export default function AdminPanel() {
     setRestaurants(data || [])
   }
 
+  async function fetchBlogPosts() {
+    const { data } = await supabase
+      .from('blog_posts')
+      .select('*')
+      .order('created_at', { ascending: false })
+    setBlogPosts(data || [])
+  }
+
   async function fetchRestaurantReviews(restaurantId) {
     const { data } = await supabase
       .from('reviews')
@@ -76,10 +92,7 @@ export default function AdminPanel() {
   }
 
   async function approveReview(id) {
-    const { data, error } = await supabase
-      .from('reviews')
-      .update({ status: 'approved' })
-      .eq('id', id)
+    const { error } = await supabase.from('reviews').update({ status: 'approved' }).eq('id', id)
     if (error) { alert('Hata: ' + error.message); return }
     setPendingReviews(prev => prev.filter(r => r.id !== id))
   }
@@ -105,11 +118,58 @@ export default function AdminPanel() {
       video_url: document.getElementById('r-video-' + r.id).value,
       maps_url: document.getElementById('r-maps-' + r.id).value,
       rating: document.getElementById('r-rating-' + r.id).value,
+      slug: document.getElementById('r-slug-' + r.id).value,
     }).eq('id', r.id)
     alert('✓ Kaydedildi')
   }
 
+  async function saveBlogPost(post) {
+    await supabase.from('blog_posts').update({
+      title: editingPost.title,
+      excerpt: editingPost.excerpt,
+      category: editingPost.category,
+      emoji: editingPost.emoji,
+      thumb_class: editingPost.thumb_class,
+      read_time: editingPost.read_time,
+      is_active: editingPost.is_active,
+    }).eq('id', post.id)
+    setEditingPost(null)
+    fetchBlogPosts()
+    alert('✓ Blog yazısı kaydedildi')
+  }
+
+  async function deleteBlogPost(id) {
+    if (!confirm('Bu blog yazısını silmek istediğinden emin misin?')) return
+    await supabase.from('blog_posts').delete().eq('id', id)
+    fetchBlogPosts()
+  }
+
+  async function addBlogPost() {
+    if (!newPost.title) { alert('Başlık zorunlu'); return }
+    await supabase.from('blog_posts').insert({
+      ...newPost,
+      is_active: true,
+    })
+    setNewPost({ title: '', excerpt: '', category: '', emoji: '', thumb_class: 't1', read_time: '5 dk okuma' })
+    setShowNewPost(false)
+    fetchBlogPosts()
+  }
+
   if (!isAdmin) return null
+
+  const inputStyle = {
+    width: '100%', padding: '9px 12px',
+    background: 'rgba(255,255,255,0.07)',
+    border: '1px solid rgba(255,255,255,0.1)',
+    borderRadius: '8px', color: '#FAF7F2',
+    fontFamily: 'inherit', fontSize: '0.82rem', outline: 'none',
+  }
+
+  const labelStyle = {
+    fontSize: '0.68rem', letterSpacing: '0.08em',
+    textTransform: 'uppercase', color: 'rgba(250,247,242,0.4)',
+    marginBottom: '5px', display: 'block',
+  }
 
   return (
     <>
@@ -128,110 +188,74 @@ export default function AdminPanel() {
       >
         🔧 Yönetim
         {pendingReviews.length > 0 && (
-          <span style={{
-            background: '#F55D00', color: '#fff',
-            borderRadius: '100px', padding: '1px 7px', fontSize: '0.7rem',
-          }}>
+          <span style={{ background: '#F55D00', color: '#fff', borderRadius: '100px', padding: '1px 7px', fontSize: '0.7rem' }}>
             {pendingReviews.length}
           </span>
         )}
       </button>
 
       {open && (
-        <div
-          onClick={() => setOpen(false)}
-          style={{
-            position: 'fixed', inset: 0, zIndex: 2400,
-            background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)',
-          }}
-        />
+        <div onClick={() => setOpen(false)} style={{
+          position: 'fixed', inset: 0, zIndex: 2400,
+          background: 'rgba(0,0,0,0.5)', backdropFilter: 'blur(3px)',
+        }} />
       )}
 
       <div style={{
         position: 'fixed', top: 0, right: 0, bottom: 0, zIndex: 2500,
-        width: '500px', maxWidth: '100vw',
-        background: '#111008',
+        width: '500px', maxWidth: '100vw', background: '#111008',
         boxShadow: '-24px 0 80px rgba(0,0,0,0.35)',
         display: 'flex', flexDirection: 'column',
         transform: open ? 'translateX(0)' : 'translateX(110%)',
         transition: 'transform 0.32s cubic-bezier(.4,0,.2,1)',
       }}>
-        <div style={{
-          padding: '24px 24px 0',
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          flexShrink: 0,
-        }}>
+        {/* Header */}
+        <div style={{ padding: '24px 24px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
           <div>
-            <div style={{
-              fontFamily: 'var(--font-poppins)', fontWeight: 700,
-              fontSize: '1rem', color: '#FAF7F2',
-            }}>
+            <div style={{ fontFamily: 'var(--font-poppins)', fontWeight: 700, fontSize: '1rem', color: '#FAF7F2' }}>
               bizzat<span style={{ color: '#F55D00' }}>ankara</span>
             </div>
-            <div style={{
-              fontSize: '0.7rem', letterSpacing: '0.1em',
-              textTransform: 'uppercase', color: 'rgba(250,247,242,0.35)',
-              marginTop: '2px',
-            }}>
+            <div style={{ fontSize: '0.7rem', letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(250,247,242,0.35)', marginTop: '2px' }}>
               Yönetim Paneli
             </div>
           </div>
-          <button onClick={() => setOpen(false)} style={{
-            background: 'rgba(255,255,255,0.08)', border: 'none',
-            color: '#FAF7F2', width: '36px', height: '36px',
-            borderRadius: '50%', cursor: 'pointer', fontSize: '1rem',
-          }}>✕</button>
+          <button onClick={() => setOpen(false)} style={{ background: 'rgba(255,255,255,0.08)', border: 'none', color: '#FAF7F2', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '1rem' }}>✕</button>
         </div>
 
-        <div style={{
-          display: 'flex', padding: '20px 24px 0',
-          borderBottom: '1px solid rgba(255,255,255,0.07)',
-          flexShrink: 0, gap: '2px',
-        }}>
-          {['yorumlar', 'mekanlar'].map(t => (
-            <button key={t} onClick={() => setTab(t)} style={{
+        {/* Sekmeler */}
+        <div style={{ display: 'flex', padding: '20px 24px 0', borderBottom: '1px solid rgba(255,255,255,0.07)', flexShrink: 0, gap: '2px', overflowX: 'auto' }}>
+          {[
+            { key: 'yorumlar', label: '💬 Yorumlar' },
+            { key: 'mekanlar', label: '📍 Mekanlar' },
+            { key: 'blog', label: '📝 Blog' },
+          ].map(t => (
+            <button key={t.key} onClick={() => setTab(t.key)} style={{
               padding: '8px 14px', borderRadius: '8px 8px 0 0',
               fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
-              color: tab === t ? '#FAF7F2' : 'rgba(250,247,242,0.45)',
+              color: tab === t.key ? '#FAF7F2' : 'rgba(250,247,242,0.45)',
               border: 'none', background: 'none', fontFamily: 'inherit',
-              borderBottom: tab === t ? '2px solid #F55D00' : '2px solid transparent',
-              marginBottom: '-1px',
+              borderBottom: tab === t.key ? '2px solid #F55D00' : '2px solid transparent',
+              marginBottom: '-1px', whiteSpace: 'nowrap',
             }}>
-              {t === 'yorumlar' ? (
-                <span>
-                  💬 Yorumlar{' '}
-                  {pendingReviews.length > 0 && (
-                    <span style={{
-                      background: '#F55D00', color: '#fff',
-                      borderRadius: '100px', padding: '1px 6px',
-                      fontSize: '0.65rem', marginLeft: '4px',
-                    }}>
-                      {pendingReviews.length}
-                    </span>
-                  )}
-                </span>
-              ) : '📍 Mekanlar'}
+              {t.key === 'yorumlar' && pendingReviews.length > 0
+                ? <span>{t.label} <span style={{ background: '#F55D00', color: '#fff', borderRadius: '100px', padding: '1px 6px', fontSize: '0.65rem' }}>{pendingReviews.length}</span></span>
+                : t.label}
             </button>
           ))}
         </div>
 
+        {/* İçerik */}
         <div style={{ flex: 1, overflowY: 'auto', padding: '20px 24px 32px' }}>
 
+          {/* YORUMLAR */}
           {tab === 'yorumlar' && (
             <>
               {pendingReviews.length === 0 ? (
-                <div style={{
-                  textAlign: 'center', padding: '40px 0',
-                  color: 'rgba(250,247,242,0.3)', fontSize: '0.85rem',
-                }}>
+                <div style={{ textAlign: 'center', padding: '40px 0', color: 'rgba(250,247,242,0.3)', fontSize: '0.85rem' }}>
                   ✓ Bekleyen yorum yok
                 </div>
               ) : pendingReviews.map(r => (
-                <div key={r.id} style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '12px', padding: '14px', marginBottom: '10px',
-                }}>
+                <div key={r.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', padding: '14px', marginBottom: '10px' }}>
                   <div style={{ fontSize: '0.7rem', color: 'rgba(250,247,242,0.4)', marginBottom: '6px' }}>
                     <strong style={{ color: 'rgba(250,247,242,0.75)' }}>{r.user_name}</strong>
                     {' · '}{'★'.repeat(r.stars)}{'☆'.repeat(5 - r.stars)}
@@ -243,32 +267,19 @@ export default function AdminPanel() {
                     </div>
                   )}
                   <div style={{ display: 'flex', gap: '8px' }}>
-                    <button onClick={() => approveReview(r.id)} style={{
-                      flex: 1, padding: '8px', borderRadius: '8px',
-                      background: '#2A7A4A', color: '#fff', border: 'none',
-                      fontSize: '0.78rem', fontWeight: 500, cursor: 'pointer',
-                      fontFamily: 'inherit',
-                    }}>✓ Onayla</button>
-                    <button onClick={() => rejectReview(r.id)} style={{
-                      flex: 1, padding: '8px', borderRadius: '8px',
-                      background: 'rgba(255,255,255,0.08)', color: 'rgba(250,247,242,0.7)',
-                      border: 'none', fontSize: '0.78rem', fontWeight: 500,
-                      cursor: 'pointer', fontFamily: 'inherit',
-                    }}>✕ Reddet</button>
+                    <button onClick={() => approveReview(r.id)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#2A7A4A', color: '#fff', border: 'none', fontSize: '0.78rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>✓ Onayla</button>
+                    <button onClick={() => rejectReview(r.id)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.08)', color: 'rgba(250,247,242,0.7)', border: 'none', fontSize: '0.78rem', fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}>✕ Reddet</button>
                   </div>
                 </div>
               ))}
             </>
           )}
 
+          {/* MEKANLAR */}
           {tab === 'mekanlar' && (
             <>
               {restaurants.map(r => (
-                <div key={r.id} style={{
-                  background: 'rgba(255,255,255,0.05)',
-                  border: '1px solid rgba(255,255,255,0.08)',
-                  borderRadius: '12px', marginBottom: '8px', overflow: 'hidden',
-                }}>
+                <div key={r.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', marginBottom: '8px', overflow: 'hidden' }}>
                   <div
                     onClick={async () => {
                       const el = document.getElementById('rf-' + r.id)
@@ -279,10 +290,7 @@ export default function AdminPanel() {
                         setRestaurantReviews(prev => ({ ...prev, [r.id]: reviews }))
                       }
                     }}
-                    style={{
-                      display: 'flex', alignItems: 'center', gap: '10px',
-                      padding: '14px 16px', cursor: 'pointer',
-                    }}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', cursor: 'pointer' }}
                   >
                     <span style={{ fontSize: '1.3rem' }}>{r.emoji}</span>
                     <div>
@@ -292,10 +300,7 @@ export default function AdminPanel() {
                     <span style={{ marginLeft: 'auto', color: 'rgba(250,247,242,0.3)' }}>▾</span>
                   </div>
 
-                  <div id={'rf-' + r.id} style={{
-                    display: 'none', flexDirection: 'column', gap: '10px',
-                    padding: '0 16px 16px',
-                  }}>
+                  <div id={'rf-' + r.id} style={{ display: 'none', flexDirection: 'column', gap: '10px', padding: '0 16px 16px' }}>
                     {[
                       { label: 'Mekan Adı', id: 'r-name-' + r.id, val: r.name },
                       { label: 'Tür', id: 'r-type-' + r.id, val: r.type },
@@ -304,48 +309,20 @@ export default function AdminPanel() {
                       { label: 'Instagram Video', id: 'r-video-' + r.id, val: r.video_url },
                       { label: 'Google Maps', id: 'r-maps-' + r.id, val: r.maps_url },
                       { label: 'Puan', id: 'r-rating-' + r.id, val: r.rating },
+                      { label: 'Slug (URL)', id: 'r-slug-' + r.id, val: r.slug },
                     ].map(f => (
                       <div key={f.id}>
-                        <div style={{
-                          fontSize: '0.68rem', letterSpacing: '0.08em',
-                          textTransform: 'uppercase', color: 'rgba(250,247,242,0.4)',
-                          marginBottom: '5px',
-                        }}>
-                          {f.label}
-                        </div>
-                        <input
-                          id={f.id}
-                          defaultValue={f.val || ''}
-                          style={{
-                            width: '100%', padding: '9px 12px',
-                            background: 'rgba(255,255,255,0.07)',
-                            border: '1px solid rgba(255,255,255,0.1)',
-                            borderRadius: '8px', color: '#FAF7F2',
-                            fontFamily: 'inherit', fontSize: '0.82rem', outline: 'none',
-                          }}
-                        />
+                        <label style={labelStyle}>{f.label}</label>
+                        <input id={f.id} defaultValue={f.val || ''} style={inputStyle} />
                       </div>
                     ))}
-
-                    <button
-                      onClick={() => saveRestaurant(r)}
-                      style={{
-                        width: '100%', padding: '8px', borderRadius: '8px',
-                        background: '#F55D00', color: '#fff', border: 'none',
-                        fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 500,
-                        cursor: 'pointer', marginTop: '4px',
-                      }}
-                    >
+                    <button onClick={() => saveRestaurant(r)} style={{ width: '100%', padding: '8px', borderRadius: '8px', background: '#F55D00', color: '#fff', border: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 500, cursor: 'pointer', marginTop: '4px' }}>
                       💾 Kaydet
                     </button>
 
                     {/* Onaylı Yorumlar */}
                     <div style={{ marginTop: '12px' }}>
-                      <div style={{
-                        fontSize: '0.68rem', letterSpacing: '0.08em',
-                        textTransform: 'uppercase', color: 'rgba(250,247,242,0.4)',
-                        marginBottom: '8px',
-                      }}>
+                      <div style={{ fontSize: '0.68rem', letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(250,247,242,0.4)', marginBottom: '8px' }}>
                         Onaylı Yorumlar {restaurantReviews[r.id] ? '(' + restaurantReviews[r.id].length + ')' : ''}
                       </div>
                       {!restaurantReviews[r.id] ? (
@@ -353,45 +330,119 @@ export default function AdminPanel() {
                       ) : restaurantReviews[r.id].length === 0 ? (
                         <div style={{ fontSize: '0.75rem', color: 'rgba(250,247,242,0.3)' }}>Henüz onaylı yorum yok</div>
                       ) : restaurantReviews[r.id].map(rev => (
-                        <div key={rev.id} style={{
-                          background: 'rgba(255,255,255,0.04)',
-                          border: '1px solid rgba(255,255,255,0.06)',
-                          borderRadius: '8px', padding: '10px', marginBottom: '6px',
-                        }}>
-                          <div style={{
-                            display: 'flex', justifyContent: 'space-between',
-                            alignItems: 'flex-start', marginBottom: '4px',
-                          }}>
+                        <div key={rev.id} style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '8px', padding: '10px', marginBottom: '6px' }}>
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '4px' }}>
                             <div>
-                              <span style={{ fontSize: '0.78rem', color: '#FAF7F2', fontWeight: 500 }}>
-                                {rev.user_name}
-                              </span>
-                              <span style={{ fontSize: '0.72rem', color: '#F55D00', marginLeft: '8px' }}>
-                                {'★'.repeat(rev.stars)}
-                              </span>
+                              <span style={{ fontSize: '0.78rem', color: '#FAF7F2', fontWeight: 500 }}>{rev.user_name}</span>
+                              <span style={{ fontSize: '0.72rem', color: '#F55D00', marginLeft: '8px' }}>{'★'.repeat(rev.stars)}</span>
                             </div>
-                            <button
-                              onClick={() => deleteReview(rev.id, r.id)}
-                              style={{
-                                background: 'rgba(200,50,50,0.2)',
-                                color: 'rgba(255,100,100,0.9)',
-                                border: 'none', borderRadius: '6px',
-                                padding: '3px 8px', fontSize: '0.7rem',
-                                cursor: 'pointer', fontFamily: 'inherit',
-                              }}
-                            >
+                            <button onClick={() => deleteReview(rev.id, r.id)} style={{ background: 'rgba(200,50,50,0.2)', color: 'rgba(255,100,100,0.9)', border: 'none', borderRadius: '6px', padding: '3px 8px', fontSize: '0.7rem', cursor: 'pointer', fontFamily: 'inherit' }}>
                               🗑 Sil
                             </button>
                           </div>
-                          {rev.text && (
-                            <div style={{ fontSize: '0.75rem', color: 'rgba(250,247,242,0.6)', lineHeight: 1.5 }}>
-                              &quot;{rev.text}&quot;
-                            </div>
-                          )}
+                          {rev.text && <div style={{ fontSize: '0.75rem', color: 'rgba(250,247,242,0.6)', lineHeight: 1.5 }}>&quot;{rev.text}&quot;</div>}
                         </div>
                       ))}
                     </div>
                   </div>
+                </div>
+              ))}
+            </>
+          )}
+
+          {/* BLOG */}
+          {tab === 'blog' && (
+            <>
+              {/* Yeni yazı ekle butonu */}
+              <button
+                onClick={() => setShowNewPost(!showNewPost)}
+                style={{
+                  width: '100%', padding: '10px', borderRadius: '10px',
+                  background: 'rgba(245,93,0,0.15)', color: '#F55D00',
+                  border: '1.5px dashed rgba(245,93,0,0.4)',
+                  fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 500,
+                  cursor: 'pointer', marginBottom: '16px',
+                }}
+              >
+                + Yeni Blog Yazısı Ekle
+              </button>
+
+              {/* Yeni yazı formu */}
+              {showNewPost && (
+                <div style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(245,93,0,0.3)', borderRadius: '12px', padding: '16px', marginBottom: '16px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    <div><label style={labelStyle}>Başlık</label><input style={inputStyle} placeholder="Yazı başlığı" value={newPost.title} onChange={e => setNewPost(p => ({ ...p, title: e.target.value }))} /></div>
+                    <div><label style={labelStyle}>Özet</label><textarea style={{ ...inputStyle, minHeight: '72px', resize: 'vertical' }} placeholder="Kısa özet..." value={newPost.excerpt} onChange={e => setNewPost(p => ({ ...p, excerpt: e.target.value }))} /></div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div><label style={labelStyle}>Kategori</label><input style={inputStyle} placeholder="Rehber, Liste..." value={newPost.category} onChange={e => setNewPost(p => ({ ...p, category: e.target.value }))} /></div>
+                      <div><label style={labelStyle}>Emoji</label><input style={inputStyle} placeholder="🏙️" value={newPost.emoji} onChange={e => setNewPost(p => ({ ...p, emoji: e.target.value }))} /></div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                      <div>
+                        <label style={labelStyle}>Renk</label>
+                        <select style={inputStyle} value={newPost.thumb_class} onChange={e => setNewPost(p => ({ ...p, thumb_class: e.target.value }))}>
+                          <option value="t1">Turuncu ton</option>
+                          <option value="t2">Yeşil ton</option>
+                          <option value="t3">Pembe ton</option>
+                        </select>
+                      </div>
+                      <div><label style={labelStyle}>Okuma süresi</label><input style={inputStyle} placeholder="5 dk okuma" value={newPost.read_time} onChange={e => setNewPost(p => ({ ...p, read_time: e.target.value }))} /></div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                      <button onClick={addBlogPost} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#F55D00', color: '#fff', border: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 500, cursor: 'pointer' }}>💾 Ekle</button>
+                      <button onClick={() => setShowNewPost(false)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: 'rgba(255,255,255,0.08)', color: 'rgba(250,247,242,0.7)', border: 'none', fontFamily: 'inherit', fontSize: '0.8rem', cursor: 'pointer' }}>İptal</button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Mevcut yazılar */}
+              {blogPosts.map(post => (
+                <div key={post.id} style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '12px', marginBottom: '8px', overflow: 'hidden' }}>
+                  <div
+                    onClick={() => setEditingPost(editingPost?.id === post.id ? null : { ...post })}
+                    style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 16px', cursor: 'pointer' }}
+                  >
+                    <span style={{ fontSize: '1.3rem' }}>{post.emoji}</span>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 500, color: '#FAF7F2', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{post.title}</div>
+                      <div style={{ fontSize: '0.7rem', color: 'rgba(250,247,242,0.4)' }}>{post.category} · {post.read_time}</div>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <div style={{ width: '8px', height: '8px', borderRadius: '50%', background: post.is_active ? '#2A7A4A' : 'rgba(255,255,255,0.2)' }} title={post.is_active ? 'Yayında' : 'Gizli'} />
+                      <span style={{ color: 'rgba(250,247,242,0.3)', fontSize: '0.8rem' }}>▾</span>
+                    </div>
+                  </div>
+
+                  {editingPost?.id === post.id && (
+                    <div style={{ padding: '0 16px 16px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                      <div><label style={labelStyle}>Başlık</label><input style={inputStyle} value={editingPost.title} onChange={e => setEditingPost(p => ({ ...p, title: e.target.value }))} /></div>
+                      <div><label style={labelStyle}>Özet</label><textarea style={{ ...inputStyle, minHeight: '72px', resize: 'vertical' }} value={editingPost.excerpt || ''} onChange={e => setEditingPost(p => ({ ...p, excerpt: e.target.value }))} /></div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div><label style={labelStyle}>Kategori</label><input style={inputStyle} value={editingPost.category || ''} onChange={e => setEditingPost(p => ({ ...p, category: e.target.value }))} /></div>
+                        <div><label style={labelStyle}>Emoji</label><input style={inputStyle} value={editingPost.emoji || ''} onChange={e => setEditingPost(p => ({ ...p, emoji: e.target.value }))} /></div>
+                      </div>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                        <div>
+                          <label style={labelStyle}>Renk</label>
+                          <select style={inputStyle} value={editingPost.thumb_class} onChange={e => setEditingPost(p => ({ ...p, thumb_class: e.target.value }))}>
+                            <option value="t1">Turuncu ton</option>
+                            <option value="t2">Yeşil ton</option>
+                            <option value="t3">Pembe ton</option>
+                          </select>
+                        </div>
+                        <div><label style={labelStyle}>Okuma süresi</label><input style={inputStyle} value={editingPost.read_time || ''} onChange={e => setEditingPost(p => ({ ...p, read_time: e.target.value }))} /></div>
+                      </div>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <input type="checkbox" id={'active-' + post.id} checked={editingPost.is_active} onChange={e => setEditingPost(p => ({ ...p, is_active: e.target.checked }))} />
+                        <label htmlFor={'active-' + post.id} style={{ fontSize: '0.8rem', color: 'rgba(250,247,242,0.6)', cursor: 'pointer' }}>Yayında</label>
+                      </div>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button onClick={() => saveBlogPost(post)} style={{ flex: 1, padding: '8px', borderRadius: '8px', background: '#F55D00', color: '#fff', border: 'none', fontFamily: 'inherit', fontSize: '0.8rem', fontWeight: 500, cursor: 'pointer' }}>💾 Kaydet</button>
+                        <button onClick={() => deleteBlogPost(post.id)} style={{ padding: '8px 12px', borderRadius: '8px', background: 'rgba(200,50,50,0.2)', color: 'rgba(255,100,100,0.9)', border: 'none', fontFamily: 'inherit', fontSize: '0.8rem', cursor: 'pointer' }}>🗑</button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </>

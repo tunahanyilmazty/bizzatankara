@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import Link from 'next/link'
 
 function useFavorites() {
   const [favorites, setFavorites] = useState(new Set())
@@ -187,7 +188,11 @@ export default function Map({ restaurants }) {
 
         const count = reviewCounts[r.id] || 0
         const reviewBtn = count > 0
-          ? `<div style="padding:0 12px 12px"><button onclick="window.openRestaurantReviews(${r.id})" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #E8DDD0;background:none;font-size:0.78rem;cursor:pointer;color:#7A6A5A;font-family:inherit">💬 ${count} Yorum Gör</button></div>`
+          ? `<div style="padding:0 12px 8px"><button onclick="window.openRestaurantReviews(${r.id})" style="width:100%;padding:8px;border-radius:8px;border:1.5px solid #E8DDD0;background:none;font-size:0.78rem;cursor:pointer;color:#7A6A5A;font-family:inherit">💬 ${count} Yorum Gör</button></div>`
+          : ''
+
+        const detailBtn = r.slug
+          ? `<div style="padding:0 12px 12px"><a href="/mekan/${r.slug}" style="display:block;width:100%;padding:8px;border-radius:8px;background:#FAF7F2;border:1.5px solid #E8DDD0;font-size:0.78rem;color:#1A1208;text-decoration:none;text-align:center;font-family:inherit">Mekan Sayfasına Git →</a></div>`
           : ''
 
         const popup = L.popup({
@@ -205,6 +210,7 @@ export default function Map({ restaurants }) {
             <a href="${r.video_url}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;border-radius:8px;font-size:0.75rem;font-weight:500;text-decoration:none;background:#1A1208;color:#fff">▶ İnceleme</a>
           </div>
           ${reviewBtn}
+          ${detailBtn}
         `)
 
         const marker = L.marker([r.lat, r.lng], { icon }).addTo(map).bindPopup(popup)
@@ -247,7 +253,6 @@ export default function Map({ restaurants }) {
         {/* SOL PANEL */}
         <div style={{ background: '#fff', borderRight: '1px solid #E8DDD0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-          {/* Header */}
           <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #E8DDD0' }}>
             <h3 style={{ fontFamily: 'var(--font-playfair)', fontSize: '1.3rem', color: '#1A1208', marginBottom: '4px' }}>
               Mekanlar
@@ -272,7 +277,6 @@ export default function Map({ restaurants }) {
             </button>
           </div>
 
-          {/* Filtreler */}
           <div style={{ display: 'flex', gap: '6px', padding: '12px 24px', borderBottom: '1px solid #E8DDD0', overflowX: 'auto' }}>
             {tags.map(tag => (
               <button
@@ -300,7 +304,6 @@ export default function Map({ restaurants }) {
             ))}
           </div>
 
-          {/* Mekan listesi */}
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {displayList.length === 0 && activeTag === 'favoriler' ? (
               <div style={{ textAlign: 'center', padding: '48px 24px', color: '#7A6A5A' }}>
@@ -311,40 +314,48 @@ export default function Map({ restaurants }) {
             ) : displayList.map(r => (
               <div
                 key={r.id}
-                onClick={() => selectRestaurant(r)}
                 style={{
                   display: 'flex', gap: '14px', padding: '16px 24px',
-                  borderBottom: '1px solid #E8DDD0', cursor: 'pointer',
+                  borderBottom: '1px solid #E8DDD0',
                   alignItems: 'flex-start',
                   background: activeId === r.id ? '#FEF5F0' : '#fff',
                   borderLeft: activeId === r.id ? '3px solid #F55D00' : '3px solid transparent',
                   transition: 'background 0.15s',
                 }}
               >
-                <div style={{
-                  width: '52px', height: '52px', borderRadius: '10px',
-                  background: '#FAF7F2', border: '1px solid #E8DDD0',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontSize: '1.6rem', flexShrink: 0,
-                }}>
-                  {r.emoji}
-                </div>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: 500, fontSize: '0.92rem', color: '#1A1208', marginBottom: '2px' }}>
-                    {r.name}
+                <div
+                  onClick={() => selectRestaurant(r)}
+                  style={{ display: 'flex', gap: '14px', flex: 1, alignItems: 'flex-start', cursor: 'pointer' }}
+                >
+                  <div style={{
+                    width: '52px', height: '52px', borderRadius: '10px',
+                    background: '#FAF7F2', border: '1px solid #E8DDD0',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: '1.6rem', flexShrink: 0,
+                  }}>
+                    {r.emoji}
                   </div>
-                  <div style={{ fontSize: '0.75rem', color: '#7A6A5A', marginBottom: '6px' }}>
-                    {r.type} · {r.area}
-                  </div>
-                  <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                    {r.tags?.map(t => (
-                      <span key={t} style={{
-                        fontSize: '0.65rem', padding: '2px 7px', borderRadius: '100px',
-                        background: '#FAF7F2', color: '#7A6A5A', border: '1px solid #E8DDD0',
-                      }}>
-                        {t}
-                      </span>
-                    ))}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <Link
+                      href={r.slug ? `/mekan/${r.slug}` : '#'}
+                      style={{ fontWeight: 500, fontSize: '0.92rem', color: '#1A1208', marginBottom: '2px', display: 'block', textDecoration: 'none' }}
+                      onClick={e => e.stopPropagation()}
+                    >
+                      {r.name}
+                    </Link>
+                    <div style={{ fontSize: '0.75rem', color: '#7A6A5A', marginBottom: '6px' }}>
+                      {r.type} · {r.area}
+                    </div>
+                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                      {r.tags?.map(t => (
+                        <span key={t} style={{
+                          fontSize: '0.65rem', padding: '2px 7px', borderRadius: '100px',
+                          background: '#FAF7F2', color: '#7A6A5A', border: '1px solid #E8DDD0',
+                        }}>
+                          {t}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
@@ -366,7 +377,6 @@ export default function Map({ restaurants }) {
                       color: favorites.has(r.id) ? '#E8445A' : '#D0C4B8',
                       padding: '2px',
                     }}
-                    title={favorites.has(r.id) ? 'Favorilerden çıkar' : 'Favorilere ekle'}
                   >
                     {favorites.has(r.id) ? '♥' : '♡'}
                   </button>

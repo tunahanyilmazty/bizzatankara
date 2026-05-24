@@ -3,6 +3,9 @@ import Navbar from '../components/Navbar'
 import MapWrapper from '../components/MapWrapper'
 import Reviews from '../components/Reviews'
 import AdminPanel from '../components/AdminPanel'
+import Categories from '../components/Categories'
+import Blog from '../components/Blog'
+import Footer from '../components/Footer'
 
 export default async function Home() {
   const { data: restaurants } = await supabase
@@ -13,7 +16,7 @@ export default async function Home() {
   return (
     <>
       <Navbar />
-      <main style={{paddingTop: '64px'}}>
+      <main style={{ paddingTop: '64px' }}>
 
         {/* HERO */}
         <section style={{
@@ -28,7 +31,7 @@ export default async function Home() {
             color: 'var(--rust)', marginBottom: '28px',
             display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <span style={{width:'28px',height:'1px',background:'var(--rust)',display:'inline-block'}}/>
+            <span style={{ width: '28px', height: '1px', background: 'var(--rust)', display: 'inline-block' }} />
             Ankara Rehberi
           </div>
 
@@ -39,7 +42,7 @@ export default async function Home() {
             marginBottom: '24px',
           }}>
             Ankara&apos;yı<br />
-            <em style={{color: 'var(--rust)', fontStyle: 'italic'}}>bizzat</em><br />
+            <em style={{ color: 'var(--rust)', fontStyle: 'italic' }}>bizzat</em><br />
             keşfet
           </h1>
 
@@ -50,18 +53,16 @@ export default async function Home() {
             Şehrin en iyi restoranları, gizli kalmış mekanları ve yerel lezzetleri — hepsi tek bir rehberde.
           </p>
 
-          <div style={{display: 'flex', gap: '16px', alignItems: 'center'}}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
             <a href="#harita" style={{
               background: 'var(--dark)', color: '#fff',
               padding: '14px 32px', borderRadius: '100px',
-              fontSize: '0.9rem', fontWeight: 500,
-              textDecoration: 'none',
+              fontSize: '0.9rem', fontWeight: 500, textDecoration: 'none',
             }}>
               Haritayı Gör
             </a>
             <a href="#blog" style={{
-              color: 'var(--text-muted)', fontSize: '0.9rem',
-              textDecoration: 'none',
+              color: 'var(--text-muted)', fontSize: '0.9rem', textDecoration: 'none',
             }}>
               Blog&apos;u oku →
             </a>
@@ -73,9 +74,9 @@ export default async function Home() {
             borderTop: '1px solid var(--border)',
           }}>
             {[
-              {num: '54K', label: 'Takipçi'},
-              {num: '2 Yıl', label: 'İçerik Üretimi'},
-              {num: `${restaurants?.length || 0}`, label: 'Anlaşmalı Mekan'},
+              { num: '54K', label: 'Takipçi' },
+              { num: '2 Yıl', label: 'İçerik Üretimi' },
+              { num: `${restaurants?.length || 0}`, label: 'Anlaşmalı Mekan' },
             ].map(s => (
               <div key={s.label}>
                 <span style={{
@@ -85,7 +86,7 @@ export default async function Home() {
                 }}>
                   {s.num}
                 </span>
-                <span style={{fontSize: '0.8rem', color: 'var(--text-muted)'}}>
+                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   {s.label}
                 </span>
               </div>
@@ -93,9 +94,12 @@ export default async function Home() {
           </div>
         </section>
 
+        {/* KATEGORİLER */}
+        <Categories />
+
         {/* HARİTA */}
-        <section id="harita" style={{background: '#fff', overflow: 'hidden'}}>
-          <div style={{padding: '60px 80px 32px'}}>
+        <section id="harita" style={{ background: '#fff', overflow: 'hidden' }}>
+          <div style={{ padding: '60px 80px 32px' }}>
             <span style={{
               fontSize: '0.75rem', letterSpacing: '0.12em',
               textTransform: 'uppercase', color: 'var(--rust)',
@@ -108,14 +112,18 @@ export default async function Home() {
               fontSize: 'clamp(2rem, 3.5vw, 3rem)',
               color: 'var(--dark)',
             }}>
-              Haritadan <em style={{color: 'var(--rust)', fontStyle: 'italic'}}>Bul</em>
+              Haritadan <em style={{ color: 'var(--rust)', fontStyle: 'italic' }}>Bul</em>
             </h2>
           </div>
           <MapWrapper restaurants={restaurants} />
         </section>
-{/* YORUMLAR */}
+          {/* BLOG */}
+        <Blog />
+        {/* YORUMLAR */}
         <Reviews restaurants={restaurants} />
+
         <AdminPanel />
+        <Footer />
       </main>
     </>
   )
