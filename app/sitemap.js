@@ -3,13 +3,11 @@ import { supabase } from '../lib/supabase'
 export default async function sitemap() {
   const baseUrl = 'https://bizzatankara.com'
 
-  // Mekanlar
   const { data: restaurants } = await supabase
     .from('restaurants')
-    .select('slug, updated_at')
+    .select('slug')
     .not('slug', 'is', null)
 
-  // Blog yazıları
   const { data: posts } = await supabase
     .from('blog_posts')
     .select('slug, created_at')
@@ -18,7 +16,7 @@ export default async function sitemap() {
 
   const restaurantUrls = (restaurants || []).map(r => ({
     url: `${baseUrl}/mekan/${r.slug}`,
-    lastModified: r.updated_at || new Date(),
+    lastModified: new Date(),
     changeFrequency: 'weekly',
     priority: 0.8,
   }))
