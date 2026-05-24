@@ -2,6 +2,7 @@ import { supabase } from '../lib/supabase'
 import Navbar from '../components/Navbar'
 import MapWrapper from '../components/MapWrapper'
 import Reviews from '../components/Reviews'
+import AdminPanel from '../components/AdminPanel'
 
 export default async function Home() {
   const { data: restaurants } = await supabase
@@ -114,6 +115,7 @@ export default async function Home() {
         </section>
 {/* YORUMLAR */}
         <Reviews restaurants={restaurants} />
+        <AdminPanel />
       </main>
     </>
   )
