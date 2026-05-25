@@ -43,7 +43,7 @@ export default function Categories() {
 
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(4, 1fr)',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
           gap: '1px',
           border: '1px solid rgba(255,255,255,0.08)',
           borderRadius: '12px',

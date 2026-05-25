@@ -49,7 +49,7 @@ export default function Blog() {
 
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
         gap: '32px',
       }}>
         {posts.map(post => (

@@ -13,13 +13,11 @@ function useFavorites() {
       setUser(session?.user ?? null)
       if (session?.user) loadFavorites(session.user.id)
     })
-
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
       if (session?.user) loadFavorites(session.user.id)
       else setFavorites(new Set())
     })
-
     return () => subscription.unsubscribe()
   }, [])
 
@@ -37,16 +35,9 @@ function useFavorites() {
       await supabase.from('favorites').delete()
         .eq('user_id', user.id)
         .eq('restaurant_id', restaurantId)
-      setFavorites(prev => {
-        const next = new Set(prev)
-        next.delete(restaurantId)
-        return next
-      })
+      setFavorites(prev => { const n = new Set(prev); n.delete(restaurantId); return n })
     } else {
-      await supabase.from('favorites').insert({
-        user_id: user.id,
-        restaurant_id: restaurantId,
-      })
+      await supabase.from('favorites').insert({ user_id: user.id, restaurant_id: restaurantId })
       setFavorites(prev => new Set([...prev, restaurantId]))
     }
     return true
@@ -55,33 +46,58 @@ function useFavorites() {
   return { favorites, toggleFavorite, user }
 }
 
+// Akıllı sorgulama adımları
+const STEPS = [
+  {
+    id: 'meal',
+    question: 'Ne yemek istiyorsun?',
+    options: [
+      { label: '🍖 Et & Kebap', tags: ['öğle', 'akşam'], types: ['Et & Kebap', 'Cağ Kebabı', 'İskender & Et', 'Aspava & Döner'] },
+      { label: '☕ Kahve & Kafe', tags: ['kafe'], types: ['Özel Kahve', 'Kahvaltı & Kafe', 'Fırın & Pastane'] },
+      { label: '🥐 Kahvaltı', tags: ['kahvaltı'], types: ['Kahvaltı', 'Tatlı & Kahvaltı', 'Fırın & Pastane'] },
+      { label: '🍽️ Türk Mutfağı', tags: ['öğle', 'akşam'], types: ['Türk Mutfağı', 'Lahmacun & Kebap'] },
+      { label: '🍰 Tatlı', tags: ['kafe'], types: ['Tatlı & Kahvaltı', 'Fırın & Pastane'] },
+      { label: '🎲 Sürpriz yap!', tags: [], types: [] },
+    ],
+  },
+  {
+    id: 'time',
+    question: 'Ne zaman?',
+    options: [
+      { label: '☀️ Şu an / Öğle', tags: ['öğle'] },
+      { label: '🌙 Akşam', tags: ['akşam'] },
+      { label: '🌅 Sabah / Kahvaltı', tags: ['kahvaltı'] },
+      { label: '⏰ Fark etmez', tags: [] },
+    ],
+  },
+]
+
 export default function Map({ restaurants }) {
   const mapRef = useRef(null)
   const mapInstanceRef = useRef(null)
   const [reviewModal, setReviewModal] = useState(null)
   const [reviewCounts, setReviewCounts] = useState({})
-  const [locating, setLocating] = useState(false)
-  const [located, setLocated] = useState(false)
-  const [sortedRestaurants, setSortedRestaurants] = useState(restaurants)
-  const [activeId, setActiveId] = useState(null)
-  const [activeTag, setActiveTag] = useState('hepsi')
   const userMarkerRef = useRef(null)
   const { favorites, toggleFavorite, user } = useFavorites()
 
-  useEffect(() => {
-    fetchReviewCounts()
-  }, [])
+  // Akıllı arama state
+  const [showSmartSearch, setShowSmartSearch] = useState(false)
+  const [step, setStep] = useState(0)
+  const [answers, setAnswers] = useState({})
+  const [filteredResults, setFilteredResults] = useState([])
+  const [showResults, setShowResults] = useState(false)
+
+  // Konum state
+  const [locating, setLocating] = useState(false)
+  const [located, setLocated] = useState(false)
+
+  useEffect(() => { fetchReviewCounts() }, [])
 
   async function fetchReviewCounts() {
-    const { data } = await supabase
-      .from('reviews')
-      .select('restaurant_id')
-      .eq('status', 'approved')
+    const { data } = await supabase.from('reviews').select('restaurant_id').eq('status', 'approved')
     if (!data) return
     const counts = {}
-    data.forEach(r => {
-      counts[r.restaurant_id] = (counts[r.restaurant_id] || 0) + 1
-    })
+    data.forEach(r => { counts[r.restaurant_id] = (counts[r.restaurant_id] || 0) + 1 })
     setReviewCounts(counts)
   }
 
@@ -97,12 +113,6 @@ export default function Map({ restaurants }) {
     return m < 1000 ? Math.round(m) + ' m' : (m / 1000).toFixed(1) + ' km'
   }
 
-  function getFiltered(list) {
-    if (activeTag === 'favoriler') return list.filter(r => favorites.has(r.id))
-    if (activeTag === 'hepsi') return list
-    return list.filter(r => r.tags?.includes(activeTag))
-  }
-
   function locateUser() {
     if (!navigator.geolocation) { alert('Tarayıcınız konum desteklemiyor.'); return }
     setLocating(true)
@@ -111,7 +121,6 @@ export default function Map({ restaurants }) {
         const { latitude: lat, longitude: lng } = pos.coords
         const map = mapInstanceRef.current
         if (!map) return
-
         import('leaflet').then(L => {
           if (userMarkerRef.current) map.removeLayer(userMarkerRef.current)
           const icon = L.divIcon({
@@ -120,18 +129,17 @@ export default function Map({ restaurants }) {
           })
           userMarkerRef.current = L.marker([lat, lng], { icon }).addTo(map)
           userMarkerRef.current.bindTooltip('📍 Buradasın', { permanent: false, direction: 'top' })
-          map.setView([lat, lng], 16, { animate: true })
+          map.setView([lat, lng], 15, { animate: true })
         })
-
-        const withDist = [...restaurants].map(r => ({
-          ...r,
-          distance: calcDist(lat, lng, r.lat, r.lng)
-        })).sort((a, b) => a.distance - b.distance)
-
-        setSortedRestaurants(withDist)
+        // En yakın 3 mekanı göster
+        const withDist = [...restaurants]
+          .map(r => ({ ...r, distance: calcDist(lat, lng, r.lat, r.lng) }))
+          .sort((a, b) => a.distance - b.distance)
+          .slice(0, 3)
+        setFilteredResults(withDist)
+        setShowResults(true)
         setLocating(false)
         setLocated(true)
-        setActiveTag('hepsi')
       },
       err => {
         setLocating(false)
@@ -142,17 +150,60 @@ export default function Map({ restaurants }) {
     )
   }
 
-  function selectRestaurant(r) {
-    setActiveId(r.id)
-    const map = mapInstanceRef.current
-    if (map) {
-      map.setView([r.lat, r.lng], 15, { animate: true })
-      setTimeout(() => {
-        if (window._markers && window._markers[r.id]) {
-          window._markers[r.id].openPopup()
+  function handleAnswer(option) {
+    const newAnswers = { ...answers, [STEPS[step].id]: option }
+    setAnswers(newAnswers)
+    if (step < STEPS.length - 1) {
+      setStep(step + 1)
+    } else {
+      // Sonuçları hesapla
+      const mealAnswer = newAnswers['meal']
+      const timeAnswer = newAnswers['time']
+      let results = [...restaurants]
+
+      if (mealAnswer.label === '🎲 Sürpriz yap!') {
+        // Rastgele 3 mekan
+        results = results.sort(() => Math.random() - 0.5).slice(0, 3)
+      } else {
+        // Tür filtresi
+        if (mealAnswer.types && mealAnswer.types.length > 0) {
+          results = results.filter(r => mealAnswer.types.includes(r.type))
         }
-      }, 400)
+        // Zaman filtresi
+        if (timeAnswer.tags && timeAnswer.tags.length > 0) {
+          const filtered = results.filter(r => r.tags?.some(t => timeAnswer.tags.includes(t)))
+          if (filtered.length > 0) results = filtered
+        }
+        // Max 3 sonuç
+        results = results.slice(0, 3)
+      }
+
+      setFilteredResults(results)
+      setShowResults(true)
+      setShowSmartSearch(false)
+
+      // Haritada göster
+      const map = mapInstanceRef.current
+      if (map && results.length > 0) {
+        map.setView([results[0].lat, results[0].lng], 14, { animate: true })
+        setTimeout(() => {
+          results.forEach(r => {
+            if (window._markers && window._markers[r.id]) {
+              window._markers[r.id].openPopup()
+            }
+          })
+        }, 500)
+      }
     }
+  }
+
+  function resetSearch() {
+    setStep(0)
+    setAnswers({})
+    setFilteredResults([])
+    setShowResults(false)
+    setShowSmartSearch(false)
+    setLocated(false)
   }
 
   useEffect(() => {
@@ -162,20 +213,16 @@ export default function Map({ restaurants }) {
 
     import('leaflet').then(L => {
       if (mapRef.current._leaflet_id) return
-
       const link = document.createElement('link')
       link.rel = 'stylesheet'
       link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css'
       document.head.appendChild(link)
 
-      const map = L.map(mapRef.current, {
-        zoomControl: true,
-        scrollWheelZoom: false,
-      }).setView([39.9150, 32.8400], 13)
+      const map = L.map(mapRef.current, { zoomControl: true, scrollWheelZoom: false })
+        .setView([39.9150, 32.8400], 13)
 
       L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
-        attribution: '&copy; OpenStreetMap &copy; CARTO',
-        maxZoom: 19,
+        attribution: '&copy; OpenStreetMap &copy; CARTO', maxZoom: 19,
       }).addTo(map)
 
       window._markers = {}
@@ -195,23 +242,22 @@ export default function Map({ restaurants }) {
           ? `<div style="padding:0 12px 12px"><a href="/mekan/${r.slug}" style="display:block;width:100%;padding:8px;border-radius:8px;background:#FAF7F2;border:1.5px solid #E8DDD0;font-size:0.78rem;color:#1A1208;text-decoration:none;text-align:center;font-family:inherit">Mekan Sayfasına Git →</a></div>`
           : ''
 
-        const popup = L.popup({
-          className: 'custom-popup', offset: [0, -10], closeButton: false,
-        }).setContent(`
-          <div style="padding:16px 16px 0;background:#fff">
-            <span style="font-size:1.8rem;display:block;margin-bottom:8px">${r.emoji}</span>
-            <div style="font-size:1rem;font-weight:600;color:#1A1208">${r.name}</div>
-            <div style="font-size:0.75rem;color:#7A6A5A;margin-top:2px">${r.type} · ${r.area}</div>
-            <div style="font-size:0.8rem;color:#C94A00;margin-top:6px">${r.rating}</div>
-            <p style="font-size:.78rem;color:#7A7A75;margin-top:8px;margin-bottom:14px">${r.description}</p>
-          </div>
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 12px 8px">
-            <a href="${r.maps_url}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;border-radius:8px;font-size:0.75rem;font-weight:500;text-decoration:none;background:#F55D00;color:#fff">📍 Konuma Git</a>
-            <a href="${r.video_url}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;border-radius:8px;font-size:0.75rem;font-weight:500;text-decoration:none;background:#1A1208;color:#fff">▶ İnceleme</a>
-          </div>
-          ${reviewBtn}
-          ${detailBtn}
-        `)
+        const popup = L.popup({ className: 'custom-popup', offset: [0, -10], closeButton: false })
+          .setContent(`
+            <div style="padding:16px 16px 0;background:#fff">
+              <span style="font-size:1.8rem;display:block;margin-bottom:8px">${r.emoji}</span>
+              <div style="font-size:1rem;font-weight:600;color:#1A1208">${r.name}</div>
+              <div style="font-size:0.75rem;color:#7A6A5A;margin-top:2px">${r.type} · ${r.area}</div>
+              <div style="font-size:0.8rem;color:#C94A00;margin-top:6px">${r.rating}</div>
+              <p style="font-size:.78rem;color:#7A7A75;margin-top:8px;margin-bottom:14px">${r.description}</p>
+            </div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:0 12px 8px">
+              <a href="${r.maps_url}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;border-radius:8px;font-size:0.75rem;font-weight:500;text-decoration:none;background:#F55D00;color:#fff">📍 Konuma Git</a>
+              <a href="${r.video_url}" target="_blank" style="display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 6px;border-radius:8px;font-size:0.75rem;font-weight:500;text-decoration:none;background:#1A1208;color:#fff">▶ İnceleme</a>
+            </div>
+            ${reviewBtn}
+            ${detailBtn}
+          `)
 
         const marker = L.marker([r.lat, r.lng], { icon }).addTo(map).bindPopup(popup)
         window._markers[r.id] = marker
@@ -221,10 +267,7 @@ export default function Map({ restaurants }) {
     })
 
     return () => {
-      if (mapInstanceRef.current) {
-        mapInstanceRef.current.remove()
-        mapInstanceRef.current = null
-      }
+      if (mapInstanceRef.current) { mapInstanceRef.current.remove(); mapInstanceRef.current = null }
     }
   }, [reviewCounts])
 
@@ -232,163 +275,180 @@ export default function Map({ restaurants }) {
     window.openRestaurantReviews = async (restaurantId) => {
       const restaurant = restaurants.find(r => r.id === restaurantId)
       const { data: reviews } = await supabase
-        .from('reviews')
-        .select('*')
-        .eq('restaurant_id', restaurantId)
-        .eq('status', 'approved')
+        .from('reviews').select('*')
+        .eq('restaurant_id', restaurantId).eq('status', 'approved')
         .order('created_at', { ascending: false })
       setReviewModal({ restaurant, reviews: reviews || [] })
     }
     return () => { delete window.openRestaurantReviews }
   }, [restaurants])
 
-  const tags = ['hepsi', 'kahvaltı', 'öğle', 'akşam', 'kafe', 'favoriler']
-  const displayList = getFiltered(sortedRestaurants)
   const colors = ['#F55D00', '#2A7A4A', '#1A6BB5', '#8A4FB5', '#C94A00', '#2A5A7A']
+  const currentStep = STEPS[step]
 
   return (
     <>
-      <div style={{ display: 'grid', gridTemplateColumns: '380px 1fr', height: '700px' }}>
+      {/* Arama Butonları */}
+      <div style={{
+        display: 'flex', gap: '12px', padding: '20px 24px',
+        background: '#fff', borderBottom: '1px solid #E8DDD0',
+        flexWrap: 'wrap',
+      }}>
+        <button
+          onClick={locateUser}
+          disabled={locating}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '10px 20px', borderRadius: '100px',
+            background: located ? '#2A7A4A' : '#F55D00',
+            color: '#fff', border: 'none', cursor: 'pointer',
+            fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: 500,
+            opacity: locating ? 0.7 : 1,
+          }}
+        >
+          {locating ? '⏳ Alınıyor...' : located ? '✓ Konuma Göre Arandı' : '📍 Konumuma Göre Ara'}
+        </button>
 
-        {/* SOL PANEL */}
-        <div style={{ background: '#fff', borderRight: '1px solid #E8DDD0', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        <button
+          onClick={() => { setShowSmartSearch(true); setStep(0); setAnswers({}) }}
+          style={{
+            display: 'flex', alignItems: 'center', gap: '8px',
+            padding: '10px 20px', borderRadius: '100px',
+            background: 'none', color: '#1A1208',
+            border: '1.5px solid #E8DDD0', cursor: 'pointer',
+            fontFamily: 'inherit', fontSize: '0.85rem', fontWeight: 500,
+          }}
+        >
+          🎯 Kategoriye Göre Ara
+        </button>
 
-          <div style={{ padding: '24px 24px 16px', borderBottom: '1px solid #E8DDD0' }}>
-            <h3 style={{ fontFamily: 'var(--font-playfair)', fontSize: '1.3rem', color: '#1A1208', marginBottom: '4px' }}>
-              Mekanlar
+        {(showResults || located) && (
+          <button
+            onClick={resetSearch}
+            style={{
+              display: 'flex', alignItems: 'center', gap: '6px',
+              padding: '10px 16px', borderRadius: '100px',
+              background: 'none', color: '#7A6A5A',
+              border: '1.5px solid #E8DDD0', cursor: 'pointer',
+              fontFamily: 'inherit', fontSize: '0.82rem',
+            }}
+          >
+            ✕ Temizle
+          </button>
+        )}
+      </div>
+
+      {/* Akıllı Arama Modal */}
+      {showSmartSearch && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 3000,
+          background: 'rgba(26,18,8,0.7)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          padding: '20px',
+        }}>
+          <div style={{
+            background: '#fff', borderRadius: '24px',
+            width: '100%', maxWidth: '480px',
+            padding: '40px', position: 'relative',
+            boxShadow: '0 32px 80px rgba(0,0,0,0.25)',
+          }}>
+            <button onClick={() => setShowSmartSearch(false)} style={{
+              position: 'absolute', top: '16px', right: '16px',
+              background: 'none', border: 'none', cursor: 'pointer',
+              fontSize: '1.2rem', color: '#7A6A5A',
+            }}>✕</button>
+
+            {/* Progress */}
+            <div style={{ display: 'flex', gap: '6px', marginBottom: '28px' }}>
+              {STEPS.map((s, i) => (
+                <div key={s.id} style={{
+                  flex: 1, height: '3px', borderRadius: '2px',
+                  background: i <= step ? '#F55D00' : '#E8DDD0',
+                  transition: 'background 0.3s',
+                }} />
+              ))}
+            </div>
+
+            <h3 style={{
+              fontFamily: 'var(--font-playfair)',
+              fontSize: '1.5rem', color: '#1A1208',
+              marginBottom: '24px', lineHeight: 1.3,
+            }}>
+              {currentStep.question}
             </h3>
-            <p style={{ fontSize: '0.78rem', color: '#7A6A5A' }}>
-              {located ? 'Konumuna göre sıralandı' : 'Tıkla, haritada bul'}
-            </p>
-            <button
-              onClick={locateUser}
-              disabled={locating}
-              style={{
-                marginTop: '12px',
-                display: 'inline-flex', alignItems: 'center', gap: '7px',
-                padding: '8px 16px', borderRadius: '100px',
-                background: located ? '#2A7A4A' : '#F55D00',
-                color: '#fff', border: 'none', cursor: locating ? 'wait' : 'pointer',
-                fontFamily: 'inherit', fontSize: '0.78rem', fontWeight: 500,
-                opacity: locating ? 0.7 : 1,
-              }}
-            >
-              {locating ? '⏳ Alınıyor...' : located ? '✓ Konuma göre sıralandı' : '📍 Konumuma göre ara'}
-            </button>
-          </div>
 
-          <div style={{ display: 'flex', gap: '6px', padding: '12px 24px', borderBottom: '1px solid #E8DDD0', overflowX: 'auto' }}>
-            {tags.map(tag => (
-              <button
-                key={tag}
-                onClick={() => {
-                  if (tag === 'favoriler' && !user) {
-                    alert('Favorileri görmek için giriş yapman gerekiyor.')
-                    return
-                  }
-                  setActiveTag(tag)
-                }}
-                style={{
-                  padding: '5px 12px', borderRadius: '100px',
-                  fontSize: '0.75rem', fontWeight: 500, cursor: 'pointer',
-                  whiteSpace: 'nowrap', fontFamily: 'inherit',
-                  background: activeTag === tag ? (tag === 'favoriler' ? '#E8445A' : '#F55D00') : 'none',
-                  color: activeTag === tag ? '#fff' : (tag === 'favoriler' ? '#E8445A' : '#7A6A5A'),
-                  border: activeTag === tag
-                    ? (tag === 'favoriler' ? '1px solid #E8445A' : '1px solid #F55D00')
-                    : (tag === 'favoriler' ? '1px solid #FDDDE2' : '1px solid #E8DDD0'),
-                }}
-              >
-                {tag === 'favoriler' ? '♥ Favorilerim' : tag.charAt(0).toUpperCase() + tag.slice(1)}
-              </button>
-            ))}
-          </div>
-
-          <div style={{ overflowY: 'auto', flex: 1 }}>
-            {displayList.length === 0 && activeTag === 'favoriler' ? (
-              <div style={{ textAlign: 'center', padding: '48px 24px', color: '#7A6A5A' }}>
-                <div style={{ fontSize: '2rem', marginBottom: '12px' }}>♡</div>
-                <div style={{ fontSize: '0.88rem' }}>Henüz favori eklemedin.</div>
-                <div style={{ fontSize: '0.78rem', marginTop: '6px', opacity: 0.7 }}>Mekan listesindeki kalp ikonuna tıkla.</div>
-              </div>
-            ) : displayList.map(r => (
-              <div
-                key={r.id}
-                style={{
-                  display: 'flex', gap: '14px', padding: '16px 24px',
-                  borderBottom: '1px solid #E8DDD0',
-                  alignItems: 'flex-start',
-                  background: activeId === r.id ? '#FEF5F0' : '#fff',
-                  borderLeft: activeId === r.id ? '3px solid #F55D00' : '3px solid transparent',
-                  transition: 'background 0.15s',
-                }}
-              >
-                <div
-                  onClick={() => selectRestaurant(r)}
-                  style={{ display: 'flex', gap: '14px', flex: 1, alignItems: 'flex-start', cursor: 'pointer' }}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {currentStep.options.map(option => (
+                <button
+                  key={option.label}
+                  onClick={() => handleAnswer(option)}
+                  style={{
+                    padding: '14px 20px', borderRadius: '12px',
+                    border: '1.5px solid #E8DDD0', background: '#FAF7F2',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    fontSize: '0.95rem', color: '#1A1208',
+                    textAlign: 'left', transition: 'all 0.15s',
+                    fontWeight: 500,
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = '#F55D00'; e.currentTarget.style.background = '#FFF5F0' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = '#E8DDD0'; e.currentTarget.style.background = '#FAF7F2' }}
                 >
-                  <div style={{
-                    width: '52px', height: '52px', borderRadius: '10px',
-                    background: '#FAF7F2', border: '1px solid #E8DDD0',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '1.6rem', flexShrink: 0,
-                  }}>
-                    {r.emoji}
-                  </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <Link
-                      href={r.slug ? `/mekan/${r.slug}` : '#'}
-                      style={{ fontWeight: 500, fontSize: '0.92rem', color: '#1A1208', marginBottom: '2px', display: 'block', textDecoration: 'none' }}
-                      onClick={e => e.stopPropagation()}
-                    >
-                      {r.name}
-                    </Link>
-                    <div style={{ fontSize: '0.75rem', color: '#7A6A5A', marginBottom: '6px' }}>
-                      {r.type} · {r.area}
-                    </div>
-                    <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
-                      {r.tags?.map(t => (
-                        <span key={t} style={{
-                          fontSize: '0.65rem', padding: '2px 7px', borderRadius: '100px',
-                          background: '#FAF7F2', color: '#7A6A5A', border: '1px solid #E8DDD0',
-                        }}>
-                          {t}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '6px', flexShrink: 0 }}>
-                  <div style={{ fontSize: '0.75rem', color: '#C94A00', fontWeight: 500 }}>{r.rating}</div>
+                  {option.label}
+                </button>
+              ))}
+            </div>
+
+            {step > 0 && (
+              <button onClick={() => setStep(step - 1)} style={{
+                marginTop: '16px', background: 'none', border: 'none',
+                color: '#7A6A5A', cursor: 'pointer', fontSize: '0.82rem',
+                fontFamily: 'inherit',
+              }}>
+                ← Geri
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Sonuçlar */}
+      {showResults && filteredResults.length > 0 && (
+        <div style={{
+          padding: '16px 24px', background: '#FFF5F0',
+          borderBottom: '1px solid #FFD0B0',
+        }}>
+          <div style={{ fontSize: '0.78rem', color: '#7A4020', marginBottom: '10px', fontWeight: 500 }}>
+            {located ? '📍 En yakın mekanlar' : '🎯 Senin için öneriler'} — {filteredResults.length} sonuç
+          </div>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            {filteredResults.map(r => (
+              <Link
+                key={r.id}
+                href={r.slug ? `/mekan/${r.slug}` : '#'}
+                style={{ textDecoration: 'none' }}
+              >
+                <div style={{
+                  background: '#fff', border: '1.5px solid #FFD0B0',
+                  borderRadius: '12px', padding: '12px 16px',
+                  cursor: 'pointer', minWidth: '140px',
+                }}>
+                  <div style={{ fontSize: '1.4rem', marginBottom: '4px' }}>{r.emoji}</div>
+                  <div style={{ fontSize: '0.82rem', fontWeight: 500, color: '#1A1208' }}>{r.name}</div>
+                  <div style={{ fontSize: '0.7rem', color: '#7A6A5A', marginTop: '2px' }}>{r.area}</div>
                   {r.distance != null && (
-                    <div style={{ fontSize: '0.7rem', color: '#F55D00', fontWeight: 600 }}>
+                    <div style={{ fontSize: '0.7rem', color: '#F55D00', fontWeight: 600, marginTop: '4px' }}>
                       {fmtDist(r.distance)}
                     </div>
                   )}
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      if (!user) { alert('Favori eklemek için giriş yapman gerekiyor.'); return }
-                      toggleFavorite(r.id)
-                    }}
-                    style={{
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      fontSize: '1.1rem',
-                      color: favorites.has(r.id) ? '#E8445A' : '#D0C4B8',
-                      padding: '2px',
-                    }}
-                  >
-                    {favorites.has(r.id) ? '♥' : '♡'}
-                  </button>
                 </div>
-              </div>
+              </Link>
             ))}
           </div>
         </div>
+      )}
 
-        {/* SAĞ — HARİTA */}
-        <div ref={mapRef} style={{ width: '100%', height: '700px' }} />
-      </div>
+      {/* Harita */}
+      <div ref={mapRef} style={{ width: '100%', height: '600px' }} />
 
       {/* Yorumlar Modal */}
       {reviewModal && (
@@ -423,7 +483,7 @@ export default function Map({ restaurants }) {
             </div>
             <div style={{ overflowY: 'auto', padding: '24px 28px', flex: 1 }}>
               {reviewModal.reviews.length === 0 ? (
-                <div style={{ textAlign: 'center', padding: '40px 0', color: '#7A6A5A', fontSize: '0.9rem' }}>
+                <div style={{ textAlign: 'center', padding: '40px 0', color: '#7A6A5A' }}>
                   <div style={{ fontSize: '2rem', marginBottom: '12px' }}>💬</div>
                   Bu mekan için henüz onaylı yorum yok.
                 </div>
@@ -431,12 +491,7 @@ export default function Map({ restaurants }) {
                 <div key={rev.id} style={{ padding: '16px 0', borderBottom: i < reviewModal.reviews.length - 1 ? '1px solid #E8DDD0' : 'none' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                      <div style={{
-                        width: '36px', height: '36px', borderRadius: '50%',
-                        background: colors[i % colors.length],
-                        display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        color: '#fff', fontWeight: 600, fontSize: '0.82rem', flexShrink: 0,
-                      }}>
+                      <div style={{ width: '36px', height: '36px', borderRadius: '50%', background: colors[i % colors.length], display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 600, fontSize: '0.82rem', flexShrink: 0 }}>
                         {rev.user_name?.charAt(0).toUpperCase()}
                       </div>
                       <div>
@@ -455,9 +510,7 @@ export default function Map({ restaurants }) {
                       &quot;{rev.text}&quot;
                     </p>
                   )}
-                  <div style={{ fontSize: '0.7rem', color: '#2A7A4A', marginLeft: '46px', marginTop: '6px' }}>
-                    ✓ Onaylı yorum
-                  </div>
+                  <div style={{ fontSize: '0.7rem', color: '#2A7A4A', marginLeft: '46px', marginTop: '6px' }}>✓ Onaylı yorum</div>
                 </div>
               ))}
             </div>

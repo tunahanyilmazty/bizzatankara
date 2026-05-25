@@ -23,9 +23,16 @@ export default function Navbar() {
   async function handleLogout() {
     await supabase.auth.signOut()
     setUser(null)
+    setMenuOpen(false)
   }
 
-  const links = ['Harita', 'Kategoriler', 'Yorumlar', 'Blog']
+  const links = [
+    { label: 'Harita', href: '/#harita' },
+    { label: 'Kategoriler', href: '/#kategoriler' },
+    { label: 'Yorumlar', href: '/#yorumlar' },
+    { label: 'Blog', href: '/#blog' },
+  ]
+
   const userName = user?.user_metadata?.name || user?.email?.split('@')[0] || ''
 
   return (
@@ -33,57 +40,59 @@ export default function Navbar() {
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 1000,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 40px', height: '64px',
+        padding: '0 24px', height: '64px',
         background: 'rgba(250,247,242,0.94)',
         backdropFilter: 'blur(12px)',
-        borderBottom: '1px solid var(--border)',
+        borderBottom: '1px solid #E8DDD0',
       }}>
         <Link href="/" style={{
-          fontFamily: 'var(--font-poppins)', fontSize: '1.4rem',
-          fontWeight: 700, color: 'var(--dark)', textDecoration: 'none',
+          fontFamily: 'var(--font-poppins)', fontSize: '1.3rem',
+          fontWeight: 700, color: '#1A1208', textDecoration: 'none',
+          letterSpacing: '-0.02em', flexShrink: 0,
         }}>
-          bizzat<span style={{color: 'var(--rust)'}}>ankara</span>
+          bizzat<span style={{ color: '#F55D00' }}>ankara</span>
         </Link>
 
-        <ul style={{display: 'flex', gap: '32px', listStyle: 'none', alignItems: 'center'}}>
-          {links.map(item => (
-            <li key={item}>
-              <Link href={'/#' + item.toLowerCase()} style={{
-                textDecoration: 'none', color: 'var(--text-muted)',
-                fontSize: '0.88rem', fontWeight: 500,
+        {/* Desktop nav */}
+        <ul style={{
+          display: 'flex', gap: '28px', listStyle: 'none', alignItems: 'center',
+          '@media(max-width:768px)': { display: 'none' },
+        }} className="desktop-nav">
+          {links.map(l => (
+            <li key={l.label}>
+              <Link href={l.href} style={{
+                textDecoration: 'none', color: '#7A6A5A',
+                fontSize: '0.85rem', fontWeight: 500,
                 letterSpacing: '0.04em', textTransform: 'uppercase',
               }}>
-                {item}
+                {l.label}
               </Link>
             </li>
           ))}
           <li>
             <Link href="/#partner" style={{
-              background: 'var(--rust)', color: '#fff',
-              padding: '8px 20px', borderRadius: '100px',
-              textDecoration: 'none', fontSize: '0.88rem',
+              background: '#F55D00', color: '#fff',
+              padding: '7px 18px', borderRadius: '100px',
+              textDecoration: 'none', fontSize: '0.85rem',
             }}>
               İş Birliği
             </Link>
           </li>
           <li>
             {user ? (
-              <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <div style={{
                   width: '28px', height: '28px', borderRadius: '50%',
-                  background: 'var(--rust)', color: '#fff',
+                  background: '#F55D00', color: '#fff',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   fontSize: '0.72rem', fontWeight: 600,
                 }}>
                   {userName.charAt(0).toUpperCase()}
                 </div>
-                <span style={{fontSize: '0.85rem', color: 'var(--text-muted)'}}>
-                  {userName}
-                </span>
                 <button onClick={handleLogout} style={{
-                  padding: '7px 18px', borderRadius: '100px',
-                  border: '1.5px solid var(--border)', background: 'none',
-                  fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer',
+                  padding: '6px 14px', borderRadius: '100px',
+                  border: '1.5px solid #E8DDD0', background: 'none',
+                  fontSize: '0.8rem', color: '#7A6A5A', cursor: 'pointer',
                   fontFamily: 'inherit',
                 }}>
                   Çıkış
@@ -91,9 +100,9 @@ export default function Navbar() {
               </div>
             ) : (
               <button onClick={() => setAuthOpen(true)} style={{
-                padding: '7px 18px', borderRadius: '100px',
-                border: '1.5px solid var(--border)', background: 'none',
-                fontSize: '0.82rem', color: 'var(--text-muted)', cursor: 'pointer',
+                padding: '6px 16px', borderRadius: '100px',
+                border: '1.5px solid #E8DDD0', background: 'none',
+                fontSize: '0.82rem', color: '#7A6A5A', cursor: 'pointer',
                 fontFamily: 'inherit',
               }}>
                 Giriş Yap
@@ -102,56 +111,73 @@ export default function Navbar() {
           </li>
         </ul>
 
+        {/* Hamburger */}
         <button
           onClick={() => setMenuOpen(!menuOpen)}
+          className="hamburger-btn"
           style={{
-            flexDirection: 'column', gap: '5px',
             background: 'none', border: 'none', cursor: 'pointer',
-            padding: '8px',
+            padding: '8px', display: 'flex', flexDirection: 'column',
+            gap: '5px',
           }}
         >
-          <span style={{display:'block',width:'22px',height:'2px',background:'var(--dark)',borderRadius:'2px',marginBottom:'5px'}}/>
-          <span style={{display:'block',width:'22px',height:'2px',background:'var(--dark)',borderRadius:'2px',marginBottom:'5px'}}/>
-          <span style={{display:'block',width:'22px',height:'2px',background:'var(--dark)',borderRadius:'2px'}}/>
+          <span style={{ display: 'block', width: '22px', height: '2px', background: menuOpen ? 'transparent' : '#1A1208', borderRadius: '2px', transition: 'all 0.3s' }} />
+          <span style={{ display: 'block', width: '22px', height: '2px', background: '#1A1208', borderRadius: '2px', transform: menuOpen ? 'rotate(45deg) translate(5px, 5px)' : 'none', transition: 'all 0.3s' }} />
+          <span style={{ display: 'block', width: '22px', height: '2px', background: '#1A1208', borderRadius: '2px', transform: menuOpen ? 'rotate(-45deg) translate(5px, -5px)' : 'none', transition: 'all 0.3s' }} />
         </button>
       </nav>
 
+      {/* Mobil menü */}
       {menuOpen && (
         <div style={{
           position: 'fixed', top: '64px', left: 0, right: 0, bottom: 0,
-          zIndex: 999, background: 'var(--cream)',
-          padding: '32px 28px',
+          zIndex: 999, background: '#FAF7F2',
+          padding: '24px', display: 'flex', flexDirection: 'column',
+          borderTop: '1px solid #E8DDD0', overflowY: 'auto',
         }}>
-          {links.map(item => (
+          {links.map(l => (
             <Link
-              key={item}
-              href={'/#' + item.toLowerCase()}
+              key={l.label}
+              href={l.href}
               onClick={() => setMenuOpen(false)}
               style={{
-                display: 'block', padding: '14px 0',
+                display: 'block', padding: '16px 0',
                 fontSize: '1.1rem', fontWeight: 500,
-                color: 'var(--dark)', textDecoration: 'none',
-                borderBottom: '1px solid var(--border)',
+                color: '#1A1208', textDecoration: 'none',
+                borderBottom: '1px solid #E8DDD0',
               }}
             >
-              {item}
+              {l.label}
             </Link>
           ))}
+          <Link
+            href="/#partner"
+            onClick={() => setMenuOpen(false)}
+            style={{
+              display: 'block', padding: '16px 0',
+              fontSize: '1.1rem', fontWeight: 500,
+              color: '#F55D00', textDecoration: 'none',
+              borderBottom: '1px solid #E8DDD0',
+            }}
+          >
+            İş Birliği
+          </Link>
           {user ? (
             <button onClick={handleLogout} style={{
-              display: 'block', padding: '14px 0',
-              fontSize: '1.1rem', color: 'var(--rust)',
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: 'inherit',
+              marginTop: '16px', padding: '12px',
+              background: 'none', border: '1.5px solid #E8DDD0',
+              borderRadius: '10px', color: '#7A6A5A',
+              fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit',
             }}>
-              Çıkış Yap
+              Çıkış Yap ({userName})
             </button>
           ) : (
             <button onClick={() => { setMenuOpen(false); setAuthOpen(true) }} style={{
-              display: 'block', padding: '14px 0',
-              fontSize: '1.1rem', color: 'var(--rust)',
-              background: 'none', border: 'none', cursor: 'pointer',
-              fontFamily: 'inherit',
+              marginTop: '16px', padding: '12px',
+              background: '#F55D00', border: 'none',
+              borderRadius: '10px', color: '#fff',
+              fontSize: '0.9rem', cursor: 'pointer', fontFamily: 'inherit',
+              fontWeight: 500,
             }}>
               Giriş Yap
             </button>
@@ -165,6 +191,15 @@ export default function Navbar() {
           onSuccess={(u) => setUser(u)}
         />
       )}
+
+      <style>{`
+        @media (min-width: 769px) {
+          .hamburger-btn { display: none !important; }
+        }
+        @media (max-width: 768px) {
+          .desktop-nav { display: none !important; }
+        }
+      `}</style>
     </>
   )
 }

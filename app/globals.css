@@ -26,3 +26,30 @@ body {
   color: var(--text);
   overflow-x: hidden;
 }
+
+* {
+  max-width: 100%;
+}
+
+html, body {
+  overflow-x: hidden;
+}
+@media (max-width: 768px) {
+  /* Hero */
+  .hero-section {
+    padding: 48px 24px !important;
+    min-height: auto !important;
+  }
+
+  /* Genel section padding */
+  section {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+}
+@media (max-width: 768px) {
+  .map-grid {
+    grid-template-columns: 1fr !important;
+    height: auto !important;
+  }
+}

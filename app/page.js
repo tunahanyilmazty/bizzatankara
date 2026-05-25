@@ -16,13 +16,14 @@ export default async function Home() {
   return (
     <>
       <Navbar />
-      <main style={{ paddingTop: '64px' }}>
+      <main style={{ paddingTop: '64px', overflowX: 'hidden' }}>
 
         {/* HERO */}
         <section style={{
           minHeight: '100vh',
           display: 'flex', flexDirection: 'column',
-          justifyContent: 'center', padding: '80px',
+          justifyContent: 'center',
+          padding: 'clamp(40px, 8vw, 80px)',
           background: 'var(--cream)',
         }}>
           <div style={{
@@ -31,13 +32,13 @@ export default async function Home() {
             color: 'var(--rust)', marginBottom: '28px',
             display: 'flex', alignItems: 'center', gap: '8px',
           }}>
-            <span style={{ width: '28px', height: '1px', background: 'var(--rust)', display: 'inline-block' }} />
+            <span style={{ width: '28px', height: '1px', background: 'var(--rust)', display: 'inline-block', flexShrink: 0 }} />
             Ankara Rehberi
           </div>
 
           <h1 style={{
             fontFamily: 'var(--font-playfair)',
-            fontSize: 'clamp(2.8rem, 5vw, 4.2rem)',
+            fontSize: 'clamp(2.4rem, 7vw, 4.2rem)',
             lineHeight: 1.1, color: 'var(--dark)',
             marginBottom: '24px',
           }}>
@@ -47,13 +48,14 @@ export default async function Home() {
           </h1>
 
           <p style={{
-            fontSize: '1.05rem', color: 'var(--text-muted)',
+            fontSize: 'clamp(0.9rem, 3vw, 1.05rem)',
+            color: 'var(--text-muted)',
             lineHeight: 1.7, maxWidth: '420px', marginBottom: '44px',
           }}>
             Şehrin en iyi restoranları, gizli kalmış mekanları ve yerel lezzetleri — hepsi tek bir rehberde.
           </p>
 
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
             <a href="#harita" style={{
               background: 'var(--dark)', color: '#fff',
               padding: '14px 32px', borderRadius: '100px',
@@ -69,9 +71,10 @@ export default async function Home() {
           </div>
 
           <div style={{
-            display: 'flex', gap: '40px',
+            display: 'flex', gap: 'clamp(20px, 5vw, 40px)',
             marginTop: '60px', paddingTop: '40px',
             borderTop: '1px solid var(--border)',
+            flexWrap: 'wrap',
           }}>
             {[
               { num: '54K', label: 'Takipçi' },
@@ -81,7 +84,7 @@ export default async function Home() {
               <div key={s.label}>
                 <span style={{
                   fontFamily: 'var(--font-playfair)',
-                  fontSize: '2rem', fontWeight: 700,
+                  fontSize: 'clamp(1.6rem, 4vw, 2rem)', fontWeight: 700,
                   color: 'var(--dark)', display: 'block',
                 }}>
                   {s.num}
@@ -99,7 +102,7 @@ export default async function Home() {
 
         {/* HARİTA */}
         <section id="harita" style={{ background: '#fff', overflow: 'hidden' }}>
-          <div style={{ padding: '60px 80px 32px' }}>
+          <div style={{ padding: 'clamp(32px, 6vw, 60px) clamp(24px, 6vw, 80px) 24px' }}>
             <span style={{
               fontSize: '0.75rem', letterSpacing: '0.12em',
               textTransform: 'uppercase', color: 'var(--rust)',
@@ -109,7 +112,7 @@ export default async function Home() {
             </span>
             <h2 style={{
               fontFamily: 'var(--font-playfair)',
-              fontSize: 'clamp(2rem, 3.5vw, 3rem)',
+              fontSize: 'clamp(1.6rem, 4vw, 3rem)',
               color: 'var(--dark)',
             }}>
               Haritadan <em style={{ color: 'var(--rust)', fontStyle: 'italic' }}>Bul</em>
@@ -117,8 +120,10 @@ export default async function Home() {
           </div>
           <MapWrapper restaurants={restaurants} />
         </section>
-          {/* BLOG */}
+
+        {/* BLOG */}
         <Blog />
+
         {/* YORUMLAR */}
         <Reviews restaurants={restaurants} />
 
