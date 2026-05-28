@@ -155,7 +155,7 @@ export default function RunnersPage() {
             </g>
           </svg>
         </div>
-        <div className="splash-tag">Run Beyond Running</div>
+        <div className="splash-tag">RUN BEYOND RUNNING</div>
       </div>
 
       <div className="scroll-line-track">
