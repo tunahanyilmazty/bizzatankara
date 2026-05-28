@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { LOGO_PATH } from './logoPath'
 
-const GOOGLE_FORM_URL = 'https://forms.google.com'
+const GOOGLE_FORM_URL = 'https://form.jotform.com/261477059515059'
 
 export default function RunnersPage() {
   const lineRef = useRef(null)
