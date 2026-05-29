@@ -3,12 +3,11 @@
 import { useEffect, useRef, useState } from 'react'
 import { LOGO_PATH } from './logoPath'
 
-const GOOGLE_FORM_URL = 'https://form.jotform.com/261477059515059'
-
 export default function RunnersPage() {
   const lineRef = useRef(null)
   const runnerRef = useRef(null)
   const [splashDone, setSplashDone] = useState(false)
+  const [showPopup, setShowPopup] = useState(false)
 
   useEffect(() => {
     const timer = setTimeout(() => setSplashDone(true), 2800)
@@ -55,7 +54,7 @@ export default function RunnersPage() {
         .rnav-links{display:flex;gap:28px;list-style:none;align-items:center}
         .rnav-links a{color:rgba(250,247,242,0.5);text-decoration:none;font-size:0.82rem;letter-spacing:0.06em;text-transform:uppercase;transition:color 0.2s}
         .rnav-links a:hover{color:#FAF7F2}
-        .join-btn-nav{background:#120a94!important;color:#fff!important;padding:8px 20px;border-radius:100px;font-size:0.82rem;font-weight:600;border:1px solid #2D6FFF!important;text-decoration:none}
+        .join-btn-nav{background:#120a94!important;color:#fff!important;padding:8px 20px;border-radius:100px;font-size:0.82rem;font-weight:600;border:1px solid #2D6FFF!important;text-decoration:none;cursor:pointer;font-family:inherit}
 
         .hero{min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:120px 80px 80px;position:relative;overflow:hidden}
         .hero::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(18,10,148,0.2) 0%,transparent 65%);pointer-events:none}
@@ -79,7 +78,7 @@ export default function RunnersPage() {
         .hero-sub{font-size:clamp(1rem,2vw,1.15rem);color:rgba(250,247,242,0.55);max-width:500px;line-height:1.7;margin-bottom:16px}
         .hero-date{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#2D6FFF;letter-spacing:0.06em;margin-bottom:40px}
         .hero-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-        .btn-p{background:#120a94;color:#fff;padding:16px 40px;border-radius:100px;font-size:1rem;font-weight:700;text-decoration:none;border:1.5px solid #2D6FFF;transition:all 0.2s;font-family:'DM Sans',sans-serif;letter-spacing:0.02em}
+        .btn-p{background:#120a94;color:#fff;padding:16px 40px;border-radius:100px;font-size:1rem;font-weight:700;text-decoration:none;border:1.5px solid #2D6FFF;transition:all 0.2s;font-family:'DM Sans',sans-serif;letter-spacing:0.02em;cursor:pointer}
         .btn-p:hover{background:#2D6FFF;transform:translateY(-2px);box-shadow:0 12px 32px rgba(45,111,255,0.4)}
         .btn-g{color:rgba(250,247,242,0.5);font-size:0.9rem;text-decoration:none;transition:color 0.2s;font-family:'DM Sans',sans-serif}
         .btn-g:hover{color:#FAF7F2}
@@ -129,6 +128,14 @@ export default function RunnersPage() {
         .rfooter a{font-size:0.78rem;color:rgba(250,247,242,0.25);text-decoration:none;transition:color 0.2s}
         .rfooter a:hover{color:#2D6FFF}
 
+        .popup-overlay{position:fixed;inset:0;z-index:9000;background:rgba(9,9,21,0.88);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeInUp 0.3s ease}
+        .popup-box{background:#0D0D20;border:1px solid rgba(45,111,255,0.3);border-radius:24px;padding:32px;width:100%;max-width:520px;position:relative;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,0.5)}
+        .popup-close{position:absolute;top:16px;right:20px;background:none;border:none;color:rgba(250,247,242,0.4);font-size:1.4rem;cursor:pointer;z-index:1}
+        .popup-icon{font-size:2rem;margin-bottom:12px;display:block}
+        .popup-date{font-family:'Poppins',sans-serif;font-weight:700;font-size:0.78rem;color:#2D6FFF;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:10px}
+        .popup-title{font-family:'Poppins',sans-serif;font-weight:900;font-size:1.4rem;color:#FAF7F2;letter-spacing:-0.03em;margin-bottom:8px;line-height:1.1}
+        .popup-sub{font-size:0.88rem;color:rgba(250,247,242,0.45);line-height:1.6;margin-bottom:20px}
+
         @media(max-width:768px){
           .rnav{padding:0 24px}
           .rnav-links{display:none}
@@ -141,6 +148,7 @@ export default function RunnersPage() {
           .stat-num{font-size:1.6rem}
           .rfooter{padding:24px;flex-direction:column;text-align:center}
           .runner-on-bar{display:none}
+          .popup-box{padding:24px 16px}
         }
       `}</style>
 
@@ -158,6 +166,31 @@ export default function RunnersPage() {
         <div className="splash-tag">RUN BEYOND RUNNING</div>
       </div>
 
+      {/* POPUP */}
+      {showPopup && (
+        <div className="popup-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowPopup(false) }}>
+          <div className="popup-box">
+            <button className="popup-close" onClick={() => setShowPopup(false)}>✕</button>
+            <span className="popup-icon">⚡</span>
+            <div className="popup-date">1 Haziran 2026</div>
+            <h2 className="popup-title">Başvurular henüz açılmadı</h2>
+            <p className="popup-sub">
+              E-posta adresini bırak, başvurular açıldığında ilk sen haberdar ol.
+            </p>
+            <iframe
+              src="https://form.jotform.com/261483562815058"
+              style={{
+                width: '100%',
+                height: '300px',
+                border: 'none',
+                borderRadius: '12px',
+              }}
+              title="Ön Kayıt Formu"
+            />
+          </div>
+        </div>
+      )}
+
       <div className="scroll-line-track">
         <div className="scroll-line-fill" ref={lineRef} />
       </div>
@@ -170,7 +203,9 @@ export default function RunnersPage() {
           <ul className="rnav-links">
             <li><a href="#hakkinda">Hakkında</a></li>
             <li><a href="#rotalar">Rotalar</a></li>
-            <li><a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" className="join-btn-nav">Başvur</a></li>
+            <li>
+              <button onClick={() => setShowPopup(true)} className="join-btn-nav">Başvur</button>
+            </li>
           </ul>
         </nav>
 
@@ -203,9 +238,9 @@ export default function RunnersPage() {
           <div className="hero-date">Başvurular · 1 Haziran 2026</div>
 
           <div className="hero-actions">
-            <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" className="btn-p">
+            <button onClick={() => setShowPopup(true)} className="btn-p">
               Başvuru Formunu Doldur →
-            </a>
+            </button>
             <a href="#hakkinda" className="btn-g">Daha fazla ↓</a>
           </div>
 
@@ -223,8 +258,8 @@ export default function RunnersPage() {
           <div>
             <span className="about-tag">Neden bizzat runners?</span>
             <h2 className="about-title">
-              Ankara merkezli<br />
-              <span className="accent">koşu odaklı komünite.</span>
+              olmadı bir tur<br />
+              <span className="accent">koşarız mı?</span>
             </h2>
           </div>
           <div className="about-items">
@@ -285,9 +320,9 @@ export default function RunnersPage() {
             Ankara&apos;dan doğan komünitenin bir parçası ol. İlk adımı at.
           </p>
           <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
-            <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" className="btn-p" style={{ fontSize: '1rem', padding: '18px 48px' }}>
+            <button onClick={() => setShowPopup(true)} className="btn-p" style={{ fontSize: '1rem', padding: '18px 48px' }}>
               Başvuru Formunu Doldur →
-            </a>
+            </button>
           </div>
         </section>
 
@@ -314,7 +349,7 @@ export default function RunnersPage() {
           </div>
           <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
             <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a href={GOOGLE_FORM_URL} target="_blank" rel="noopener noreferrer" style={{ color: '#2D6FFF' }}>Başvur →</a>
+            <button onClick={() => setShowPopup(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#2D6FFF', fontSize: '0.78rem', fontFamily: 'inherit' }}>Başvur →</button>
           </div>
         </footer>
 
