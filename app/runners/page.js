@@ -256,7 +256,7 @@ export default function RunnersPage() {
             <span className="about-tag">Neden bizzat runners?</span>
             <h2 className="about-title">
               olmadı bir tur<br />
-              <span className="accent">koşarız mı?</span>
+              <span className="accent">koşarız!</span>
             </h2>
           </div>
           <div className="about-items">
