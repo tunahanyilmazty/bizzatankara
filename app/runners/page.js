@@ -128,7 +128,8 @@ export default function RunnersPage() {
         .rfooter a{font-size:0.78rem;color:rgba(250,247,242,0.25);text-decoration:none;transition:color 0.2s}
         .rfooter a:hover{color:#2D6FFF}
 
-        .popup-overlay{position:fixed;inset:0;z-index:9000;background:rgba(9,9,21,0.88);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px;animation:fadeInUp 0.3s ease}
+        .popup-overlay{position:fixed;inset:0;z-index:9000;background:rgba(9,9,21,0.88);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;padding:24px}
+        .popup-overlay.hidden{opacity:0;visibility:hidden;pointer-events:none}
         .popup-box{background:#0D0D20;border:1px solid rgba(45,111,255,0.3);border-radius:24px;padding:32px;width:100%;max-width:520px;position:relative;text-align:center;box-shadow:0 32px 80px rgba(0,0,0,0.5)}
         .popup-close{position:absolute;top:16px;right:20px;background:none;border:none;color:rgba(250,247,242,0.4);font-size:1.4rem;cursor:pointer;z-index:1}
         .popup-icon{font-size:2rem;margin-bottom:12px;display:block}
@@ -166,30 +167,26 @@ export default function RunnersPage() {
         <div className="splash-tag">RUN BEYOND RUNNING</div>
       </div>
 
-      {/* POPUP */}
-      {showPopup && (
-        <div className="popup-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowPopup(false) }}>
-          <div className="popup-box">
-            <button className="popup-close" onClick={() => setShowPopup(false)}>✕</button>
-            <span className="popup-icon">⚡</span>
-            <div className="popup-date">1 Haziran 2026</div>
-            <h2 className="popup-title">Başvurular henüz açılmadı</h2>
-            <p className="popup-sub">
-              E-posta adresini bırak, başvurular açıldığında ilk sen haberdar ol.
-            </p>
-            <iframe
-              src="https://form.jotform.com/261483562815058"
-              style={{
-                width: '100%',
-                height: '300px',
-                border: 'none',
-                borderRadius: '12px',
-              }}
-              title="Ön Kayıt Formu"
-            />
-          </div>
+      {/* POPUP — her zaman DOM'da, sadece gizleniyor */}
+      <div
+        className={`popup-overlay${showPopup ? '' : ' hidden'}`}
+        onClick={(e) => { if (e.target === e.currentTarget) setShowPopup(false) }}
+      >
+        <div className="popup-box">
+          <button className="popup-close" onClick={() => setShowPopup(false)}>✕</button>
+          <span className="popup-icon">⚡</span>
+          <div className="popup-date">1 Haziran 2026</div>
+          <h2 className="popup-title">Başvurular henüz açılmadı</h2>
+          <p className="popup-sub">
+            E-posta adresini bırak, başvurular açıldığında ilk sen haberdar ol.
+          </p>
+          <iframe
+            src="https://form.jotform.com/261483562815058"
+            style={{ width: '100%', height: '320px', border: 'none', borderRadius: '12px' }}
+            title="Ön Kayıt Formu"
+          />
         </div>
-      )}
+      </div>
 
       <div className="scroll-line-track">
         <div className="scroll-line-fill" ref={lineRef} />
