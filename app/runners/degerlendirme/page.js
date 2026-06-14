@@ -167,11 +167,13 @@ export default function DegerlendirmePage() {
                   <label>Genel Değerlendirme<span>*</span></label>
                   <div className="stars-wrap">
                     {stars.map(s => (
-                      <span
+                      <button
                         key={s}
+                        type="button"
                         className={`star${form.puan >= s ? ' active' : ''}`}
                         onClick={() => setPuan(s)}
-                      >⭐</span>
+                        style={{background:'none',border:'none',padding:0,cursor:'pointer'}}
+                      >⭐</button>
                     ))}
                   </div>
                   <div className="star-label">{form.puan > 0 ? starLabels[form.puan] : ''}</div>
