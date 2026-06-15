@@ -1,12 +1,17 @@
 'use client'
 
 import { useEffect, useRef, useState } from 'react'
-import { LOGO_PATH } from './logoPath'
+import { LOGO_PATH } from '../logoPath'
+import { supabase } from '../../../lib/supabase'
 
 export default function RunnersPage() {
   const lineRef = useRef(null)
   const runnerRef = useRef(null)
   const [splashDone, setSplashDone] = useState(false)
+  const [basvuruForm, setBasvuruForm] = useState({ ad_soyad: '', email: '', telefon: '' })
+  const [basvuruDone, setBasvuruDone] = useState(false)
+  const [basvuruLoading, setBasvuruLoading] = useState(false)
+  const [basvuruError, setBasvuruError] = useState('')
 
   useEffect(() => {
     const timer = setTimeout(() => setSplashDone(true), 2800)
@@ -24,6 +29,21 @@ export default function RunnersPage() {
     window.addEventListener('scroll', handleScroll, { passive: true })
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
+
+  async function handleBasvuru(e) {
+    e.preventDefault()
+    setBasvuruLoading(true)
+    setBasvuruError('')
+    const { error } = await supabase.from('runners_kosu_basvuru').insert({
+      ad_soyad: basvuruForm.ad_soyad,
+      email: basvuruForm.email,
+      telefon: basvuruForm.telefon,
+      kosu_no: 2,
+    })
+    setBasvuruLoading(false)
+    if (error) { setBasvuruError('Bir hata oluştu, tekrar deneyin.'); return }
+    setBasvuruDone(true)
+  }
 
   const IG = 'https://instagram.com/bizzatrunners'
 
@@ -74,7 +94,7 @@ export default function RunnersPage() {
         .hero-sub{font-size:clamp(1rem,2vw,1.15rem);color:rgba(250,247,242,0.55);max-width:500px;line-height:1.7;margin-bottom:16px}
         .hero-date{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#2D6FFF;letter-spacing:0.06em;margin-bottom:40px}
         .hero-actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-        .btn-p{background:#120a94;color:#fff;padding:16px 40px;border-radius:100px;font-size:1rem;font-weight:700;text-decoration:none;border:1.5px solid #2D6FFF;transition:all 0.2s;font-family:'DM Sans',sans-serif;letter-spacing:0.02em;display:inline-block}
+        .btn-p{background:#120a94;color:#fff;padding:16px 40px;border-radius:100px;font-size:1rem;font-weight:700;text-decoration:none;border:1.5px solid #2D6FFF;transition:all 0.2s;font-family:'DM Sans',sans-serif;letter-spacing:0.02em}
         .btn-p:hover{background:#2D6FFF;transform:translateY(-2px);box-shadow:0 12px 32px rgba(45,111,255,0.4)}
         .btn-g{color:rgba(250,247,242,0.5);font-size:0.9rem;text-decoration:none;transition:color 0.2s;font-family:'DM Sans',sans-serif}
         .btn-g:hover{color:#FAF7F2}
@@ -89,6 +109,8 @@ export default function RunnersPage() {
         .about-item-dot{width:8px;height:8px;border-radius:50%;background:#2D6FFF;flex-shrink:0;margin-top:7px}
         .about-item-text{font-size:1rem;color:rgba(250,247,242,0.65);line-height:1.7}
         .about-item-text strong{color:#FAF7F2;font-weight:600}
+
+        /* KOŞULAR */
         .kosular-section{padding:80px;background:#080818}
         .kosular-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}
         .kosu-card{background:#0D0D20;border:1px solid rgba(45,111,255,0.2);border-radius:20px;padding:32px;position:relative;overflow:hidden}
@@ -107,10 +129,23 @@ export default function RunnersPage() {
         .kosu-stat-val{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;color:#FAF7F2}
         .kosu-stat-label{font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(250,247,242,0.3)}
         .kosu-divider{height:1px;background:rgba(45,111,255,0.1);margin:20px 0}
+
+        /* Başvuru formu */
+        .basvuru-mini{display:flex;flex-direction:column;gap:10px}
+        .basvuru-input{width:100%;padding:11px 14px;background:rgba(255,255,255,0.05);border:1.5px solid rgba(45,111,255,0.2);border-radius:10px;color:#FAF7F2;font-family:'DM Sans',sans-serif;font-size:0.88rem;outline:none;transition:border-color 0.2s}
+        .basvuru-input:focus{border-color:#2D6FFF}
+        .basvuru-input::placeholder{color:rgba(250,247,242,0.2)}
+        .basvuru-btn{width:100%;padding:12px;background:#120a94;color:#fff;border:1.5px solid #2D6FFF;border-radius:10px;font-family:'DM Sans',sans-serif;font-size:0.9rem;font-weight:700;cursor:pointer;transition:all 0.2s}
+        .basvuru-btn:hover{background:#2D6FFF}
+        .basvuru-btn:disabled{opacity:0.5;cursor:not-allowed}
+        .basvuru-success{text-align:center;padding:20px 0}
+        .basvuru-success-icon{font-size:2rem;display:block;margin-bottom:8px}
+        .basvuru-success-text{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#4ABA7A;margin-bottom:4px}
+        .basvuru-success-sub{font-size:0.82rem;color:rgba(250,247,242,0.4)}
+        .basvuru-error{color:#E05050;font-size:0.82rem;text-align:center}
         .gizli-note{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:rgba(250,247,242,0.35);margin-bottom:16px}
         .gizli-note-dot{width:6px;height:6px;border-radius:50%;background:#2D6FFF;flex-shrink:0}
-        .kosu-btn{display:inline-block;background:#120a94;color:#fff;padding:12px 28px;border-radius:100px;font-size:0.9rem;font-weight:700;text-decoration:none;border:1.5px solid #2D6FFF;transition:all 0.2s;font-family:'DM Sans',sans-serif}
-        .kosu-btn:hover{background:#2D6FFF}
+
         .routes-section{padding:80px;background:#0A0A0A}
         .section-tag{font-size:0.72rem;letter-spacing:0.15em;text-transform:uppercase;color:#2D6FFF;font-weight:600;display:block;margin-bottom:16px}
         .section-title{font-family:'Poppins',sans-serif;font-weight:800;font-size:clamp(1.8rem,4vw,2.8rem);line-height:1.05;letter-spacing:-0.03em;margin-bottom:40px}
@@ -234,7 +269,7 @@ export default function RunnersPage() {
             <span className="about-tag">Neden bizzat runners?</span>
             <h2 className="about-title">
               olmadı bir tur<br />
-              <span className="accent">koşarız!</span>
+              <span className="accent">koşarız mı?</span>
             </h2>
             <a href={IG} target="_blank" rel="noopener noreferrer" className="ig-link" style={{marginTop:'24px',display:'inline-flex',alignItems:'center',gap:'6px'}}>
               @bizzatrunners → Instagram&apos;da takip et
@@ -263,9 +298,10 @@ export default function RunnersPage() {
           <h2 className="section-title">
             Her hafta yeni bir <span className="accent">rota</span>.
           </h2>
+
           <div className="kosular-grid">
 
-            {/* ROTA 001 */}
+            {/* ROTA 001 — Tamamlandı */}
             <div className="kosu-card tamamlandi">
               <div className="kosu-badge badge-tamamlandi">
                 <span className="badge-dot"></span>
@@ -292,20 +328,20 @@ export default function RunnersPage() {
               </div>
               <div className="kosu-divider"></div>
               <a href="/runners/degerlendirme" style={{color:'#4ABA7A',fontSize:'0.82rem',fontWeight:600,textDecoration:'none'}}>
-                Değerlendirmeni yap →
+                Değerlendirmeni yaz →
               </a>
             </div>
 
-            {/* ROTA 002 */}
+            {/* ROTA 002 — Yaklaşan */}
             <div className="kosu-card yaklasan">
               <div className="kosu-badge badge-yaklasan">
                 <span className="badge-dot"></span>
                 Yaklaşan
               </div>
               <div className="kosu-rota">Rota #002</div>
-              <h3 className="kosu-title"></h3>
+              <h3 className="kosu-title">Gizli Lokasyon</h3>
               <p className="kosu-desc">
-                Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz. Her koşu için sınırlı kontenjan açıyoruz — seçilen katılımcılara buluşma noktasını paylaşıyoruz.
+                Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz. Her koşu için sınırlı kontenjan açıyoruz — başvurunu yap, seçilenlere buluşma noktasını paylaşıyoruz.
               </p>
               <div className="kosu-stats">
                 <div className="kosu-stat">
@@ -317,18 +353,52 @@ export default function RunnersPage() {
                   <span className="kosu-stat-label">Saat</span>
                 </div>
                 <div className="kosu-stat">
-                  <span className="kosu-stat-val">Pazar</span>
-                  <span className="kosu-stat-label">Gün</span>
+                  <span className="kosu-stat-val">60</span>
+                  <span className="kosu-stat-label">Kontenjan</span>
                 </div>
               </div>
               <div className="kosu-divider"></div>
-              <div className="gizli-note">
-                <div className="gizli-note-dot"></div>
-                Buluşma noktası seçilen katılımcılarla paylaşılacak
-              </div>
-               <a href="/runners/basvuru?kosu=21haziran" className="kosu-btn">
-                21 Haziran Koşusuna Katıl →
-              </a>
+
+              {basvuruDone ? (
+                <div className="basvuru-success">
+                  <span className="basvuru-success-icon">⚡</span>
+                  <div className="basvuru-success-text">Başvurun alındı!</div>
+                  <div className="basvuru-success-sub">Seçilenlere buluşma noktasını bildireceğiz.</div>
+                </div>
+              ) : (
+                <form className="basvuru-mini" onSubmit={handleBasvuru}>
+                  <div className="gizli-note">
+                    <div className="gizli-note-dot"></div>
+                    Buluşma noktası seçilen katılımcılarla paylaşılacak
+                  </div>
+                  <input
+                    className="basvuru-input"
+                    placeholder="Adın Soyadın"
+                    value={basvuruForm.ad_soyad}
+                    onChange={e => setBasvuruForm(f => ({...f, ad_soyad: e.target.value}))}
+                    required
+                  />
+                  <input
+                    className="basvuru-input"
+                    type="email"
+                    placeholder="E-posta"
+                    value={basvuruForm.email}
+                    onChange={e => setBasvuruForm(f => ({...f, email: e.target.value}))}
+                    required
+                  />
+                  <input
+                    className="basvuru-input"
+                    placeholder="Telefon"
+                    value={basvuruForm.telefon}
+                    onChange={e => setBasvuruForm(f => ({...f, telefon: e.target.value}))}
+                    required
+                  />
+                  {basvuruError && <div className="basvuru-error">{basvuruError}</div>}
+                  <button type="submit" className="basvuru-btn" disabled={basvuruLoading}>
+                    {basvuruLoading ? 'Gönderiliyor...' : '21 Haziran Koşusuna Başvur →'}
+                  </button>
+                </form>
+              )}
             </div>
 
           </div>
@@ -374,8 +444,8 @@ export default function RunnersPage() {
           <p className="cta-sub">
             Ankara&apos;dan doğan komünitenin bir parçası ol. İlk adımı at.
           </p>
-          <div style={{display:'flex',gap:'16px',justifyContent:'center',flexWrap:'wrap',position:'relative',zIndex:1}}>
-            <a href="/runners/basvuru" className="btn-p" style={{fontSize:'1rem',padding:'18px 48px'}}>
+          <div style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+            <a href="/runners/basvuru" className="btn-p" style={{ fontSize: '1rem', padding: '18px 48px' }}>
               Başvuru Formunu Doldur →
             </a>
           </div>
@@ -397,14 +467,14 @@ export default function RunnersPage() {
 
         <footer className="rfooter">
           <div>
-            <a href="/runners" style={{fontFamily:'Poppins,sans-serif',fontWeight:800,color:'#FAF7F2',textDecoration:'none',fontSize:'0.95rem'}}>
-              bizzat <span style={{color:'#2D6FFF'}}>runners</span>
+            <a href="/runners" style={{ fontFamily: 'Poppins,sans-serif', fontWeight: 800, color: '#FAF7F2', textDecoration: 'none', fontSize: '0.95rem' }}>
+              bizzat <span style={{ color: '#2D6FFF' }}>runners</span>
             </a>
-            <p style={{marginTop:'4px'}}>Run Beyond Running — Ankara</p>
+            <p style={{ marginTop: '4px' }}>Run Beyond Running — Ankara</p>
           </div>
-          <div style={{display:'flex',gap:'20px',alignItems:'center'}}>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
             <a href={IG} target="_blank" rel="noopener noreferrer">Instagram</a>
-            <a href="/runners/basvuru" style={{color:'#2D6FFF'}}>Başvur →</a>
+            <a href="/runners/basvuru" style={{ color: '#2D6FFF' }}>Başvur →</a>
           </div>
         </footer>
 
