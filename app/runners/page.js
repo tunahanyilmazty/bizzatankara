@@ -313,7 +313,7 @@ export default function RunnersPage() {
                   <span className="kosu-stat-label">Tarih</span>
                 </div>
                 <div className="kosu-stat">
-                  <span className="kosu-stat-val">07:00</span>
+                  <span className="kosu-stat-val">07.00</span>
                   <span className="kosu-stat-label">Saat</span>
                 </div>
                 <div className="kosu-stat">

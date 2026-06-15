@@ -103,10 +103,10 @@ function BasvuruForm() {
         </h1>
         <p className="hero-sub">
           {is21
-            ? 'Pazar sabahı 07:00. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
+          ? 'Pazar sabahı 07.00. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
             : 'Ankara\'dan doğan komünitenin bir parçası ol. Formu doldur, seni bekleyelim.'}
         </p>
-        {is21 && (
+          {is21 && (
           <p className="hero-note">
             Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz — her koşu için sınırlı kontenjan açıyoruz. Takipte kal, başvurunu yap.
           </p>
@@ -118,7 +118,7 @@ function BasvuruForm() {
           {done ? (
             <div className="success-wrap">
               <span className="success-icon">⚡</span>
-              <h2 className="success-title">{is21 ? 'Başvurun alındı!' : 'Başvurun alındı!'}</h2>
+              <h2 className="success-title">Başvurun alındı!</h2>
               <p className="success-sub">
                 {is21
                   ? 'Harika! Başvurunu aldık. Seçilen katılımcılara buluşma noktasını ileteceğiz.'
@@ -126,9 +126,16 @@ function BasvuruForm() {
                 }<br/>
                 Bizi Instagram&apos;dan takip etmeyi unutma.
               </p>
-              <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer" className="ig-link">
-                @bizzatrunners ↗
-              </a>
+              <div style={{display:'flex',flexDirection:'column',gap:'12px',alignItems:'center',marginTop:'8px'}}>
+                <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer" className="ig-link">
+                  @bizzatrunners ↗
+                </a>
+                {is21 && (
+                  <a href="https://www.strava.com/clubs/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#FC4C02',fontSize:'0.88rem',fontWeight:600,textDecoration:'none'}}>
+                    🟠 Strava kulübümüze katıl →
+                  </a>
+                )}
+              </div>
             </div>
           ) : (
             <form onSubmit={submit}>
