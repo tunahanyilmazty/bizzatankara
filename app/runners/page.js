@@ -213,7 +213,7 @@ export default function RunnersPage() {
           <p className="hero-sub">
             Ankara&apos;dan doğan komünitenin bir parçası ol. Sınırları aş, şehri keşfet, birlikte koş.
           </p>
-          <div className="hero-date">Başvurular · 1 Haziran 2026</div>
+          <div className="hero-date">Başvurular · Aktif</div>
           <div className="hero-actions">
             <a href="/runners/basvuru" className="btn-p">Başvuru Formunu Doldur →</a>
             <a href="#hakkinda" className="btn-g">Daha fazla ↓</a>
@@ -366,7 +366,7 @@ export default function RunnersPage() {
         </section>
 
         <section className="cta-section">
-          <div className="cta-date">Başvurular · 1 Haziran 2026</div>
+          <div className="cta-date">Başvurular · Aktif</div>
           <h2 className="cta-title">
             HAZIR<br />
             <span className="accent">MISIN?</span>
