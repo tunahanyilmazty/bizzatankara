@@ -103,7 +103,7 @@ function BasvuruForm() {
         </h1>
         <p className="hero-sub">
           {is21
-          ? 'Pazar sabahı 07.00. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
+          ? 'Pazar sabahı 07.30. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
             : 'Ankara\'dan doğan komünitenin bir parçası ol. Formu doldur, seni bekleyelim.'}
         </p>
           {is21 && (
