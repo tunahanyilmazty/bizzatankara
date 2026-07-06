@@ -90,7 +90,7 @@ export default function RunnersPage() {
         .about-item-text{font-size:1rem;color:rgba(250,247,242,0.65);line-height:1.7}
         .about-item-text strong{color:#FAF7F2;font-weight:600}
         .kosular-section{padding:80px;background:#080818}
-        .kosular-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;margin-top:40px}
+        .kosular-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:24px;margin-top:40px}
         .kosu-card{background:#0D0D20;border:1px solid rgba(45,111,255,0.2);border-radius:20px;padding:32px;position:relative;overflow:hidden}
         .kosu-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
         .kosu-card.tamamlandi::before{background:linear-gradient(90deg,#1a4a1a,#4ABA7A)}
@@ -159,7 +159,6 @@ export default function RunnersPage() {
         }
       `}</style>
 
-      {/* SPLASH */}
       <div className={`splash${splashDone ? ' done' : ''}`}>
         <div className="splash-logo">
           <div className="splash-glow"></div>
@@ -179,7 +178,6 @@ export default function RunnersPage() {
       <div className="runner-on-bar" ref={runnerRef}>⚡</div>
 
       <div className="rp">
-
         <nav className="rnav">
           <a href="/runners" className="rlogo">bizzat <span>runners</span></a>
           <ul className="rnav-links">
@@ -234,7 +232,7 @@ export default function RunnersPage() {
             <span className="about-tag">Neden bizzat runners?</span>
             <h2 className="about-title">
               olmadı bir tur<br />
-              <span className="accent">koşarız!</span>
+              <span className="accent">koşarız mı?</span>
             </h2>
             <a href={IG} target="_blank" rel="noopener noreferrer" className="ig-link" style={{marginTop:'24px',display:'inline-flex',alignItems:'center',gap:'6px'}}>
               @bizzatrunners → Instagram&apos;da takip et
@@ -257,13 +255,93 @@ export default function RunnersPage() {
           </div>
         </section>
 
-        {/* KOŞULAR */}
         <section className="kosular-section" id="kosular">
           <span className="section-tag">Koşularımız</span>
           <h2 className="section-title">
             Her hafta yeni bir <span className="accent">rota</span>.
           </h2>
-          <div className="kosular-grid">
+<div className="kosular-grid">
+
+            {/* ROTA 004 — Yaklaşan */}
+            <div className="kosu-card yaklasan">
+              <div className="kosu-badge badge-yaklasan">
+                <span className="badge-dot"></span>
+                Başvuru Açık
+              </div>
+              <div className="kosu-rota">Rota #004</div>
+              <h3 className="kosu-title">Sürpriz Rota</h3>
+              <p className="kosu-desc">
+                Seçilen katılımcılara buluşma noktası paylaşılacak.
+              </p>
+              <div className="kosu-stats">
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">12 Tem</span>
+                  <span className="kosu-stat-label">Tarih</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">08.00</span>
+                  <span className="kosu-stat-label">Saat</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">Pazar</span>
+                  <span className="kosu-stat-label">Gün</span>
+                </div>
+              </div>
+              <div className="kosu-divider"></div>
+              <div className="gizli-note">
+                <div className="gizli-note-dot"></div>
+                Buluşma noktası seçilen katılımcılarla paylaşılacak
+              </div>
+              <a href="/runners/basvuru?kosu=12temmuz" className="kosu-btn">
+                12 Temmuz Koşusuna Katıl →
+              </a>
+            </div>
+
+            {/* ROTA 003 */}
+            <div className="kosu-card tamamlandi">
+              <div className="kosu-badge badge-tamamlandi">
+                <span className="badge-dot"></span>
+                Tamamlandı
+              </div>
+              <div className="kosu-rota">Rota #003</div>
+              <h3 className="kosu-title">Başkent Millet Bahçesi</h3>
+              <p className="kosu-desc">Gece koşusu. Işıklar altında Ankara&apos;nın farklı bir yüzü.</p>
+              <div className="kosu-stats">
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">27 Haz</span>
+                  <span className="kosu-stat-label">Tarih</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">20.30</span>
+                  <span className="kosu-stat-label">Saat</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">Cumartesi</span>
+                  <span className="kosu-stat-label">Gün</span>
+                </div>
+              </div>
+            </div>
+
+            {/* ROTA 002 */}
+            <div className="kosu-card tamamlandi">
+              <div className="kosu-badge badge-tamamlandi">
+                <span className="badge-dot"></span>
+                Tamamlandı
+              </div>
+              <div className="kosu-rota">Rota #002</div>
+              <h3 className="kosu-title">Beştepe</h3>
+              <p className="kosu-desc">21 Haziran sabahı Beştepe&apos;de buluştuk.</p>
+              <div className="kosu-stats">
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">21 Haz</span>
+                  <span className="kosu-stat-label">Tarih</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">07.00</span>
+                  <span className="kosu-stat-label">Saat</span>
+                </div>
+              </div>
+            </div>
 
             {/* ROTA 001 */}
             <div className="kosu-card tamamlandi">
@@ -273,9 +351,7 @@ export default function RunnersPage() {
               </div>
               <div className="kosu-rota">Rota #001</div>
               <h3 className="kosu-title">Anıtkabir</h3>
-              <p className="kosu-desc">
-                Bu projeyi anlamlı kılmak için ilk rotamız Anıtkabir oldu. 14 Haziran&apos;da Anıt Park&apos;tan Emek&apos;e koştuk.
-              </p>
+              <p className="kosu-desc">İlk rotamız. 14 Haziran&apos;da Anıt Park&apos;tan Emek&apos;e, 5.2 km, 50 katılımcı.</p>
               <div className="kosu-stats">
                 <div className="kosu-stat">
                   <span className="kosu-stat-val">5.2 km</span>
@@ -290,45 +366,6 @@ export default function RunnersPage() {
                   <span className="kosu-stat-label">Tarih</span>
                 </div>
               </div>
-              <div className="kosu-divider"></div>
-              <a href="/runners/degerlendirme" style={{color:'#4ABA7A',fontSize:'0.82rem',fontWeight:600,textDecoration:'none'}}>
-                Değerlendirmeni yap →
-              </a>
-            </div>
-
-            {/* ROTA 002 */}
-            <div className="kosu-card yaklasan">
-              <div className="kosu-badge badge-yaklasan">
-                <span className="badge-dot"></span>
-                Yaklaşan
-              </div>
-              <div className="kosu-rota">Rota #002</div>
-              <h3 className="kosu-title"></h3>
-              <p className="kosu-desc">
-                Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz. Her koşu için sınırlı kontenjan açıyoruz — seçilen katılımcılara buluşma noktasını paylaşıyoruz.
-              </p>
-              <div className="kosu-stats">
-                <div className="kosu-stat">
-                  <span className="kosu-stat-val">21 Haz</span>
-                  <span className="kosu-stat-label">Tarih</span>
-                </div>
-                <div className="kosu-stat">
-                  <span className="kosu-stat-val">07.00</span>
-                  <span className="kosu-stat-label">Saat</span>
-                </div>
-                <div className="kosu-stat">
-                  <span className="kosu-stat-val">Pazar</span>
-                  <span className="kosu-stat-label">Gün</span>
-                </div>
-              </div>
-              <div className="kosu-divider"></div>
-              <div className="gizli-note">
-                <div className="gizli-note-dot"></div>
-                Buluşma noktası seçilen katılımcılarla paylaşılacak
-              </div>
-               <a href="/runners/basvuru?kosu=21haziran" className="kosu-btn">
-                21 Haziran Koşusuna Katıl →
-              </a>
             </div>
 
           </div>
