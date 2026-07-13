@@ -169,7 +169,7 @@ export default function RunnersPage() {
             </g>
           </svg>
         </div>
-        <div className="splash-tag">RUN BEYOND RUNNING</div>
+        <div className="splash-tag">Ankara merkezli koşu odaklı komünite.</div>
       </div>
 
       <div className="scroll-line-track">
@@ -229,10 +229,9 @@ export default function RunnersPage() {
 
         <section className="about-section" id="hakkinda">
           <div>
-            <span className="about-tag">Neden bizzat runners?</span>
+            <span className="about-tag">bizzat runners</span>
             <h2 className="about-title">
-              olmadı bir tur<br />
-              <span className="accent">koşarız mı?</span>
+              Neden <span className="accent">bizzat runners?</span>
             </h2>
             <a href={IG} target="_blank" rel="noopener noreferrer" className="ig-link" style={{marginTop:'24px',display:'inline-flex',alignItems:'center',gap:'6px'}}>
               @bizzatrunners → Instagram&apos;da takip et
