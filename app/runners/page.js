@@ -100,11 +100,11 @@ export default function RunnersPage() {
         .badge-yaklasan{background:rgba(45,111,255,0.12);color:#2D6FFF;border:1px solid rgba(45,111,255,0.3)}
         .badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor;animation:dotBlink 1.2s ease-in-out infinite}
         .kosu-rota{font-family:'Poppins',sans-serif;font-weight:900;font-size:0.7rem;letter-spacing:0.15em;text-transform:uppercase;color:rgba(250,247,242,0.3);margin-bottom:6px}
-        .kosu-title{font-family:'Poppins',sans-serif;font-weight:800;font-size:1.6rem;color:#FAF7F2;letter-spacing:-0.03em;margin-bottom:12px}
+        .kosu-title{font-family:'Poppins',sans-serif;font-weight:800;font-size:1.4rem;color:#FAF7F2;letter-spacing:-0.03em;margin-bottom:12px}
         .kosu-desc{font-size:0.88rem;color:rgba(250,247,242,0.5);line-height:1.7;margin-bottom:20px}
         .kosu-stats{display:flex;gap:20px;margin-bottom:20px;flex-wrap:wrap}
         .kosu-stat{display:flex;flex-direction:column;gap:2px}
-        .kosu-stat-val{font-family:'Poppins',sans-serif;font-weight:700;font-size:1.1rem;color:#FAF7F2}
+        .kosu-stat-val{font-family:'Poppins',sans-serif;font-weight:700;font-size:1rem;color:#FAF7F2}
         .kosu-stat-label{font-size:0.7rem;letter-spacing:0.08em;text-transform:uppercase;color:rgba(250,247,242,0.3)}
         .kosu-divider{height:1px;background:rgba(45,111,255,0.1);margin:20px 0}
         .gizli-note{display:flex;align-items:center;gap:8px;font-size:0.78rem;color:rgba(250,247,242,0.35);margin-bottom:16px}
@@ -260,19 +260,50 @@ export default function RunnersPage() {
           <h2 className="section-title">
             Her hafta yeni bir <span className="accent">rota</span>.
           </h2>
-<div className="kosular-grid">
+          <div className="kosular-grid">
 
-            {/* ROTA 004 — Yaklaşan */}
+            {/* ROTA 005 */}
             <div className="kosu-card yaklasan">
               <div className="kosu-badge badge-yaklasan">
                 <span className="badge-dot"></span>
                 Başvuru Açık
               </div>
+              <div className="kosu-rota">Rota #005</div>
+              <h3 className="kosu-title">Anıttepe</h3>
+              <p className="kosu-desc">Seçilen katılımcılara buluşma noktası paylaşılacak.</p>
+              <div className="kosu-stats">
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">19 Tem</span>
+                  <span className="kosu-stat-label">Tarih</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">08.00</span>
+                  <span className="kosu-stat-label">Saat</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">Cumartesi</span>
+                  <span className="kosu-stat-label">Gün</span>
+                </div>
+              </div>
+              <div className="kosu-divider"></div>
+              <div className="gizli-note">
+                <div className="gizli-note-dot"></div>
+                Buluşma noktası seçilen katılımcılarla paylaşılacak
+              </div>
+              <a href="/runners/basvuru?kosu=19temmuz" className="kosu-btn">
+                19 Temmuz Koşusuna Katıl →
+              </a>
+            </div>
+
+            {/* ROTA 004 */}
+            <div className="kosu-card tamamlandi">
+              <div className="kosu-badge badge-tamamlandi">
+                <span className="badge-dot"></span>
+                Tamamlandı
+              </div>
               <div className="kosu-rota">Rota #004</div>
-              <h3 className="kosu-title">Sürpriz Rota</h3>
-              <p className="kosu-desc">
-                Seçilen katılımcılara buluşma noktası paylaşılacak.
-              </p>
+              <h3 className="kosu-title">Milli Atlet Muharrem Dalkılıç Koşu Yolu</h3>
+              <p className="kosu-desc">12 Temmuz sabahı gerçekleştirilen dördüncü koşumuz.</p>
               <div className="kosu-stats">
                 <div className="kosu-stat">
                   <span className="kosu-stat-val">12 Tem</span>
@@ -287,14 +318,6 @@ export default function RunnersPage() {
                   <span className="kosu-stat-label">Gün</span>
                 </div>
               </div>
-              <div className="kosu-divider"></div>
-              <div className="gizli-note">
-                <div className="gizli-note-dot"></div>
-                Buluşma noktası seçilen katılımcılarla paylaşılacak
-              </div>
-              <a href="/runners/basvuru?kosu=12temmuz" className="kosu-btn">
-                12 Temmuz Koşusuna Katıl →
-              </a>
             </div>
 
             {/* ROTA 003 */}
