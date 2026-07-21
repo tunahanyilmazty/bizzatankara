@@ -1,11 +1,11 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '../../../lib/supabase'
 import Link from 'next/link'
 
-export default function BasvuruPage() {
+function BasvuruForm() {
   const searchParams = useSearchParams()
   const kosuRef = searchParams.get('kosu') || null
 
@@ -73,6 +73,236 @@ export default function BasvuruPage() {
   const isKosu = is12 || is21 || is19 || is26
   const kosuLabel = is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
+  return (
+    <>
+      {showKvkk && (
+        <div className="kvkk-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowKvkk(false) }}>
+          <div className="kvkk-modal">
+            <button className="kvkk-modal-close" onClick={() => setShowKvkk(false)}>✕</button>
+            <h2>Kişisel Verilerin Korunması Aydınlatma Metni</h2>
+            <div className="kvkk-modal-section">
+              <h3>Veri Sorumlusu</h3>
+              <p>bizzat runners (bizzatankara.com)</p>
+            </div>
+            <div className="kvkk-modal-section">
+              <h3>Toplanan Veriler</h3>
+              <p>Ad soyad, e-posta, telefon, yaş ve koşu deneyimi bilgileri.</p>
+            </div>
+            <div className="kvkk-modal-section">
+              <h3>İşleme Amacı</h3>
+              <p>Koşu komünitesi üyelik sürecinin yürütülmesi ve etkinlik duyurularının iletilmesi.</p>
+            </div>
+            <div className="kvkk-modal-section">
+              <h3>Aktarım</h3>
+              <p>Kişisel verileriniz üçüncü kişilerle paylaşılmayacaktır.</p>
+            </div>
+            <div className="kvkk-modal-section">
+              <h3>Haklarınız</h3>
+              <p>KVKK&apos;nın 11. maddesi kapsamında verilerinize erişim, düzeltme, silme ve işlemeye itiraz haklarına sahipsiniz. Talepler için: bizzatankara@gmail.com</p>
+            </div>
+            <button className="kvkk-modal-btn" onClick={() => {
+              setForm(f => ({ ...f, kvkk_onay: true }))
+              setShowKvkk(false)
+            }}>
+              Okudum, Onaylıyorum ✓
+            </button>
+          </div>
+        </div>
+      )}
+
+      <div className="hero">
+        <div className="hero-tag">
+          {isKosu ? `Rota · ${kosuLabel} 2026` : 'Komüniteye Katıl'}
+        </div>
+        <h1 className="hero-title">
+          {isKosu ? (
+            <>{kosuLabel} <span className="accent">Koşusu</span></>
+          ) : (
+            <>Başvuru <span className="accent">Formu</span></>
+          )}
+        </h1>
+        <p className="hero-sub">
+          {isKosu
+            ? 'Pazar sabahı 07.30. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
+            : 'Ankara\'dan doğan komünitenin bir parçası ol. Formu doldur, seni bekleyelim.'}
+        </p>
+        {isKosu && (
+          <p className="hero-note">
+            Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz — her koşu için sınırlı kontenjan açıyoruz. Takipte kal, başvurunu yap.
+          </p>
+        )}
+      </div>
+
+      <div className="form-wrap">
+        <div className="form-card">
+          {done ? (
+            <div className="success-wrap">
+              <span className="success-icon">⚡</span>
+              <h2 className="success-title">Başvurun alındı!</h2>
+              <p className="success-sub">
+                {isKosu
+                  ? 'Harika! Başvurunu aldık. Seçilen katılımcılara buluşma noktasını ileteceğiz.'
+                  : 'Harika! Başvurunu aldık, en kısa sürede seninle iletişime geçeceğiz.'
+                }<br/>
+                Bizi Instagram&apos;dan takip etmeyi unutma.
+              </p>
+              <div style={{display:'flex',flexDirection:'column',gap:'12px',alignItems:'center',marginTop:'8px'}}>
+                <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer" className="ig-link">
+                  @bizzatrunners ↗
+                </a>
+                {isKosu && (
+                  <a href="https://www.strava.com/clubs/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#FC4C02',fontSize:'0.88rem',fontWeight:600,textDecoration:'none'}}>
+                    🟠 Strava kulübümüze katıl →
+                  </a>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              {isKosu && !katilimTipi && (
+                <div className="katilim-secim">
+                  <h3 className="katilim-title">Daha önce bizzatrunners koşusuna katıldın mı?</h3>
+                  <div className="katilim-btns">
+                    <button type="button" className="katilim-btn" onClick={() => setKatilimTipi('onceki')}>
+                      ✓ Evet, daha önce katıldım
+                    </button>
+                    <button type="button" className="katilim-btn katilim-btn-outline" onClick={() => setKatilimTipi('yeni')}>
+                      İlk kez katılıyorum
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {(katilimTipi || !isKosu) && (
+                <form onSubmit={submit}>
+                  {isKosu && katilimTipi && (
+                    <button
+                      type="button"
+                      onClick={() => { setKatilimTipi(null); setError('') }}
+                      style={{background:'none',border:'none',color:'rgba(250,247,242,0.35)',fontSize:'0.78rem',cursor:'pointer',marginBottom:'20px',padding:0,fontFamily:'inherit'}}
+                    >
+                      ← Geri
+                    </button>
+                  )}
+
+                  {katilimTipi === 'onceki' ? (
+                    <>
+                      <div style={{background:'rgba(45,111,255,0.06)',border:'1px solid rgba(45,111,255,0.15)',borderRadius:'10px',padding:'12px 16px',marginBottom:'20px'}}>
+                        <p style={{fontSize:'0.82rem',color:'rgba(250,247,242,0.45)',lineHeight:1.6}}>
+                          Sen zaten komünitedensin :) — sadece adını ve telefonunu doğrulayalım.
+                        </p>
+                      </div>
+                      <div className="field">
+                        <label>Adın Soyadın<span>*</span></label>
+                        <input name="ad_soyad" value={form.ad_soyad} onChange={handle} required placeholder="Adın ve soyadın"/>
+                      </div>
+                      <div className="field">
+                        <label>Telefon<span>*</span></label>
+                        <input name="telefon" value={form.telefon} onChange={handle} required placeholder="05xx xxx xx xx"/>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="field-row">
+                        <div className="field">
+                          <label>Adın Soyadın<span>*</span></label>
+                          <input name="ad_soyad" value={form.ad_soyad} onChange={handle} required placeholder="Adın ve soyadın"/>
+                        </div>
+                        <div className="field">
+                          <label>Yaşın<span>*</span></label>
+                          <input name="yas" type="number" value={form.yas} onChange={handle} required placeholder="Yaşın" min="10" max="99"/>
+                        </div>
+                      </div>
+
+                      <div className="field-row">
+                        <div className="field">
+                          <label>E-posta<span>*</span></label>
+                          <input name="email" type="email" value={form.email} onChange={handle} required placeholder="ornek@mail.com"/>
+                        </div>
+                        <div className="field">
+                          <label>Telefon<span>*</span></label>
+                          <input name="telefon" value={form.telefon} onChange={handle} required placeholder="05xx xxx xx xx"/>
+                        </div>
+                      </div>
+
+                      <div className="field">
+                        <label>Koşu Deneyimin<span>*</span></label>
+                        <select name="kosu_deneyimi" value={form.kosu_deneyimi} onChange={handle} required>
+                          <option value="">Seç...</option>
+                          <option value="Hiç koşmadım">Hiç koşmadım</option>
+                          <option value="Ara sıra koşuyorum">Ara sıra koşuyorum</option>
+                          <option value="Düzenli koşuyorum">Düzenli koşuyorum</option>
+                          <option value="Yarışmalara katılıyorum">Yarışmalara katılıyorum</option>
+                        </select>
+                      </div>
+
+                      <div className="field">
+                        <label>Seni Tanıyalım<span>*</span></label>
+                        <textarea
+                          name="sizi_taniyalim"
+                          value={form.sizi_taniyalim}
+                          onChange={handle}
+                          required
+                          placeholder="İlgi alanların, mesleğin, sana dair şeyler; bir amaç uğruna koşabilecek bir komünitenin temelinde ortak ruhlar var."
+                          style={{minHeight:'120px'}}
+                        />
+                      </div>
+
+                      <div className="field">
+                        <label>Katılma Motivasyonun</label>
+                        <textarea name="motivasyon" value={form.motivasyon} onChange={handle} placeholder="Neden bizzat runners'a katılmak istiyorsun?"/>
+                      </div>
+
+                      {!isKosu && (
+                        <div className="field">
+                          <label>Bizi Nereden Duydun?</label>
+                          <select name="nereden_duydunuz" value={form.nereden_duydunuz} onChange={handle}>
+                            <option value="">Seç...</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="Arkadaş tavsiyesi">Arkadaş tavsiyesi</option>
+                            <option value="bizzatankara.com">bizzatankara.com</option>
+                            <option value="Diğer">Diğer</option>
+                          </select>
+                        </div>
+                      )}
+                    </>
+                  )}
+
+                  <div className="kvkk-row">
+                    <input type="checkbox" id="kvkk" name="kvkk_onay" checked={form.kvkk_onay} onChange={handle}/>
+                    <span className="kvkk-row-text">
+                      <button type="button" className="kvkk-link" onClick={() => setShowKvkk(true)}>
+                        Aydınlatma Metni
+                      </button>
+                      &apos;ni okudum ve kişisel verilerimin işlenmesini onaylıyorum.
+                    </span>
+                  </div>
+
+                  {error && <div className="error-msg">{error}</div>}
+
+                  <button type="submit" className="submit-btn" disabled={loading}>
+                    {loading ? 'Gönderiliyor...' : isKosu ? `${kosuLabel} Koşusuna Başvur →` : 'Başvuruyu Gönder →'}
+                  </button>
+                </form>
+              )}
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="bfooter">
+        <p>
+          Run Beyond Running — Ankara<br/>
+          <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{color:'#2D6FFF',textDecoration:'none'}}>
+            @bizzatrunners
+          </a>
+        </p>
+      </div>
+    </>
+  )
+}
+
+export default function BasvuruPage() {
   return (
     <>
       <style>{`
@@ -147,236 +377,14 @@ export default function BasvuruPage() {
         }
       `}</style>
 
-      {/* KVKK MODAL */}
-      {showKvkk && (
-        <div className="kvkk-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) setShowKvkk(false) }}>
-          <div className="kvkk-modal">
-            <button className="kvkk-modal-close" onClick={() => setShowKvkk(false)}>✕</button>
-            <h2>Kişisel Verilerin Korunması Aydınlatma Metni</h2>
-            <div className="kvkk-modal-section">
-              <h3>Veri Sorumlusu</h3>
-              <p>bizzat runners (bizzatankara.com)</p>
-            </div>
-            <div className="kvkk-modal-section">
-              <h3>Toplanan Veriler</h3>
-              <p>Ad soyad, e-posta, telefon, yaş ve koşu deneyimi bilgileri.</p>
-            </div>
-            <div className="kvkk-modal-section">
-              <h3>İşleme Amacı</h3>
-              <p>Koşu komünitesi üyelik sürecinin yürütülmesi ve etkinlik duyurularının iletilmesi.</p>
-            </div>
-            <div className="kvkk-modal-section">
-              <h3>Aktarım</h3>
-              <p>Kişisel verileriniz üçüncü kişilerle paylaşılmayacaktır.</p>
-            </div>
-            <div className="kvkk-modal-section">
-              <h3>Haklarınız</h3>
-              <p>KVKK&apos;nın 11. maddesi kapsamında verilerinize erişim, düzeltme, silme ve işlemeye itiraz haklarına sahipsiniz. Talepler için: bizzatankara@gmail.com</p>
-            </div>
-            <button className="kvkk-modal-btn" onClick={() => {
-              setForm(f => ({ ...f, kvkk_onay: true }))
-              setShowKvkk(false)
-            }}>
-              Okudum, Onaylıyorum ✓
-            </button>
-          </div>
-        </div>
-      )}
-
       <div className="bp">
         <nav className="bnav">
           <a href="/runners" className="rlogo">bizzat <span>runners</span></a>
           <Link href="/runners" className="back-btn">← Geri dön</Link>
         </nav>
-
-        <div className="hero">
-          <div className="hero-tag">
-            {isKosu ? `Rota · ${kosuLabel} 2026` : 'Komüniteye Katıl'}
-          </div>
-          <h1 className="hero-title">
-            {isKosu ? (
-              <>{kosuLabel} <span className="accent">Koşusu</span></>
-            ) : (
-              <>Başvuru <span className="accent">Formu</span></>
-            )}
-          </h1>
-          <p className="hero-sub">
-            {isKosu
-              ? 'Pazar sabahı 07.30. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
-              : 'Ankara\'dan doğan komünitenin bir parçası ol. Formu doldur, seni bekleyelim.'}
-          </p>
-          {isKosu && (
-            <p className="hero-note">
-              Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz — her koşu için sınırlı kontenjan açıyoruz. Takipte kal, başvurunu yap.
-            </p>
-          )}
-        </div>
-
-        <div className="form-wrap">
-          <div className="form-card">
-            {done ? (
-              <div className="success-wrap">
-                <span className="success-icon">⚡</span>
-                <h2 className="success-title">Başvurun alındı!</h2>
-                <p className="success-sub">
-                  {isKosu
-                    ? 'Harika! Başvurunu aldık. Seçilen katılımcılara buluşma noktasını ileteceğiz.'
-                    : 'Harika! Başvurunu aldık, en kısa sürede seninle iletişime geçeceğiz.'
-                  }<br/>
-                  Bizi Instagram&apos;dan takip etmeyi unutma.
-                </p>
-                <div style={{display:'flex',flexDirection:'column',gap:'12px',alignItems:'center',marginTop:'8px'}}>
-                  <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer" className="ig-link">
-                    @bizzatrunners ↗
-                  </a>
-                  {isKosu && (
-                    <a href="https://www.strava.com/clubs/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#FC4C02',fontSize:'0.88rem',fontWeight:600,textDecoration:'none'}}>
-                      🟠 Strava kulübümüze katıl →
-                    </a>
-                  )}
-                </div>
-              </div>
-            ) : (
-              <>
-                {isKosu && !katilimTipi && (
-                  <div className="katilim-secim">
-                    <h3 className="katilim-title">Daha önce bizzatrunners koşusuna katıldın mı?</h3>
-                    <div className="katilim-btns">
-                      <button type="button" className="katilim-btn" onClick={() => setKatilimTipi('onceki')}>
-                        ✓ Evet, daha önce katıldım
-                      </button>
-                      <button type="button" className="katilim-btn katilim-btn-outline" onClick={() => setKatilimTipi('yeni')}>
-                        İlk kez katılıyorum
-                      </button>
-                    </div>
-                  </div>
-                )}
-
-                {(katilimTipi || !isKosu) && (
-                  <form onSubmit={submit}>
-                    {isKosu && katilimTipi && (
-                      <button
-                        type="button"
-                        onClick={() => { setKatilimTipi(null); setError('') }}
-                        style={{background:'none',border:'none',color:'rgba(250,247,242,0.35)',fontSize:'0.78rem',cursor:'pointer',marginBottom:'20px',padding:0,fontFamily:'inherit'}}
-                      >
-                        ← Geri
-                      </button>
-                    )}
-
-                    {katilimTipi === 'onceki' ? (
-                      <>
-                        <div style={{background:'rgba(45,111,255,0.06)',border:'1px solid rgba(45,111,255,0.15)',borderRadius:'10px',padding:'12px 16px',marginBottom:'20px'}}>
-                          <p style={{fontSize:'0.82rem',color:'rgba(250,247,242,0.45)',lineHeight:1.6}}>
-                            Sen zaten komünitedensin :) — sadece adını ve telefonunu doğrulayalım.
-                          </p>
-                        </div>
-                        <div className="field">
-                          <label>Adın Soyadın<span>*</span></label>
-                          <input name="ad_soyad" value={form.ad_soyad} onChange={handle} required placeholder="Adın ve soyadın"/>
-                        </div>
-                        <div className="field">
-                          <label>Telefon<span>*</span></label>
-                          <input name="telefon" value={form.telefon} onChange={handle} required placeholder="05xx xxx xx xx"/>
-                        </div>
-                      </>
-                    ) : (
-                      <>
-                        <div className="field-row">
-                          <div className="field">
-                            <label>Adın Soyadın<span>*</span></label>
-                            <input name="ad_soyad" value={form.ad_soyad} onChange={handle} required placeholder="Adın ve soyadın"/>
-                          </div>
-                          <div className="field">
-                            <label>Yaşın<span>*</span></label>
-                            <input name="yas" type="number" value={form.yas} onChange={handle} required placeholder="Yaşın" min="10" max="99"/>
-                          </div>
-                        </div>
-
-                        <div className="field-row">
-                          <div className="field">
-                            <label>E-posta<span>*</span></label>
-                            <input name="email" type="email" value={form.email} onChange={handle} required placeholder="ornek@mail.com"/>
-                          </div>
-                          <div className="field">
-                            <label>Telefon<span>*</span></label>
-                            <input name="telefon" value={form.telefon} onChange={handle} required placeholder="05xx xxx xx xx"/>
-                          </div>
-                        </div>
-
-                        <div className="field">
-                          <label>Koşu Deneyimin<span>*</span></label>
-                          <select name="kosu_deneyimi" value={form.kosu_deneyimi} onChange={handle} required>
-                            <option value="">Seç...</option>
-                            <option value="Hiç koşmadım">Hiç koşmadım</option>
-                            <option value="Ara sıra koşuyorum">Ara sıra koşuyorum</option>
-                            <option value="Düzenli koşuyorum">Düzenli koşuyorum</option>
-                            <option value="Yarışmalara katılıyorum">Yarışmalara katılıyorum</option>
-                          </select>
-                        </div>
-
-                        <div className="field">
-                          <label>Seni Tanıyalım<span>*</span></label>
-                          <textarea
-                            name="sizi_taniyalim"
-                            value={form.sizi_taniyalim}
-                            onChange={handle}
-                            required
-                            placeholder="İlgi alanların, mesleğin, sana dair şeyler; bir amaç uğruna koşabilecek bir komünitenin temelinde ortak ruhlar var."
-                            style={{minHeight:'120px'}}
-                          />
-                        </div>
-
-                        <div className="field">
-                          <label>Katılma Motivasyonun</label>
-                          <textarea name="motivasyon" value={form.motivasyon} onChange={handle} placeholder="Neden bizzat runners'a katılmak istiyorsun?"/>
-                        </div>
-
-                        {!isKosu && (
-                          <div className="field">
-                            <label>Bizi Nereden Duydun?</label>
-                            <select name="nereden_duydunuz" value={form.nereden_duydunuz} onChange={handle}>
-                              <option value="">Seç...</option>
-                              <option value="Instagram">Instagram</option>
-                              <option value="Arkadaş tavsiyesi">Arkadaş tavsiyesi</option>
-                              <option value="bizzatankara.com">bizzatankara.com</option>
-                              <option value="Diğer">Diğer</option>
-                            </select>
-                          </div>
-                        )}
-                      </>
-                    )}
-
-                    <div className="kvkk-row">
-                      <input type="checkbox" id="kvkk" name="kvkk_onay" checked={form.kvkk_onay} onChange={handle}/>
-                      <span className="kvkk-row-text">
-                        <button type="button" className="kvkk-link" onClick={() => setShowKvkk(true)}>
-                          Aydınlatma Metni
-                        </button>
-                        &apos;ni okudum ve kişisel verilerimin işlenmesini onaylıyorum.
-                      </span>
-                    </div>
-
-                    {error && <div className="error-msg">{error}</div>}
-
-                    <button type="submit" className="submit-btn" disabled={loading}>
-                      {loading ? 'Gönderiliyor...' : isKosu ? `${kosuLabel} Koşusuna Başvur →` : 'Başvuruyu Gönder →'}
-                    </button>
-                  </form>
-                )}
-              </>
-            )}
-          </div>
-        </div>
-
-        <div className="bfooter">
-          <p>
-            Run Beyond Running — Ankara<br/>
-            <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{color:'#2D6FFF',textDecoration:'none'}}>
-              @bizzatrunners
-            </a>
-          </p>
-        </div>
+        <Suspense fallback={<div style={{padding:'120px 48px',textAlign:'center',color:'rgba(250,247,242,0.3)'}}>Yükleniyor...</div>}>
+          <BasvuruForm />
+        </Suspense>
       </div>
     </>
   )
