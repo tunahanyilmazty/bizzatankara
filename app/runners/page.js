@@ -261,18 +261,18 @@ export default function RunnersPage() {
           </h2>
           <div className="kosular-grid">
 
-            {/* ROTA 006 */}
+            {/* ROTA 007 */}
             <div className="kosu-card yaklasan">
               <div className="kosu-badge badge-yaklasan">
                 <span className="badge-dot"></span>
                 Başvuru Açık
               </div>
-              <div className="kosu-rota">Rota #006</div>
-              <h3 className="kosu-title">Sürpriz Rota</h3>
+              <div className="kosu-rota">Rota #007</div>
+              <h3 className="kosu-title">Anıttepe</h3>
               <p className="kosu-desc">Seçilen katılımcılara buluşma noktası paylaşılacak.</p>
               <div className="kosu-stats">
                 <div className="kosu-stat">
-                  <span className="kosu-stat-val">26 Tem</span>
+                  <span className="kosu-stat-val">2 Ağu</span>
                   <span className="kosu-stat-label">Tarih</span>
                 </div>
                 <div className="kosu-stat">
@@ -289,9 +289,34 @@ export default function RunnersPage() {
                 <div className="gizli-note-dot"></div>
                 Buluşma noktası seçilen katılımcılarla paylaşılacak
               </div>
-              <a href="/runners/basvuru?kosu=26temmuz" className="kosu-btn">
-                26 Temmuz Koşusuna Katıl →
+              <a href="/runners/basvuru?kosu=2agustos" className="kosu-btn">
+                2 Ağustos Koşusuna Katıl →
               </a>
+            </div>
+
+            {/* ROTA 006 */}
+            <div className="kosu-card tamamlandi">
+              <div className="kosu-badge badge-tamamlandi">
+                <span className="badge-dot"></span>
+                Tamamlandı
+              </div>
+              <div className="kosu-rota">Rota #006</div>
+              <h3 className="kosu-title">Beştepe</h3>
+              <p className="kosu-desc">26 Temmuz sabahı Beştepe&apos;de buluştuk.</p>
+              <div className="kosu-stats">
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">26 Tem</span>
+                  <span className="kosu-stat-label">Tarih</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">07.30</span>
+                  <span className="kosu-stat-label">Saat</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">Pazar</span>
+                  <span className="kosu-stat-label">Gün</span>
+                </div>
+              </div>
             </div>
 
             {/* ROTA 005 */}

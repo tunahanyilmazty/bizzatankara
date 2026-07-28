@@ -70,8 +70,9 @@ function BasvuruForm() {
   const is21 = kosuRef === '21haziran'
   const is19 = kosuRef === '19temmuz'
   const is26 = kosuRef === '26temmuz'
-  const isKosu = is12 || is21 || is19 || is26
-  const kosuLabel = is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
+  const is2a = kosuRef === '2agustos'
+  const isKosu = is12 || is21 || is19 || is26 || is2a
+  const kosuLabel = is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
   return (
     <>
