@@ -125,7 +125,7 @@ function BasvuruForm() {
         </h1>
         <p className="hero-sub">
           {isKosu
-            ? 'Pazar sabahı 20.30. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
+            ? 'Çarşamba akşamı 20.30. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
             : 'Ankara\'dan doğan komünitenin bir parçası ol. Formu doldur, seni bekleyelim.'}
         </p>
         {isKosu && (
