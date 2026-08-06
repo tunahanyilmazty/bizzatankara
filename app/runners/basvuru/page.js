@@ -72,8 +72,9 @@ function BasvuruForm() {
   const is26 = kosuRef === '26temmuz'
   const is2a = kosuRef === '2agustos'
   const is5a = kosuRef === '5agustos'
-  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a
-  const kosuLabel = is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
+  const is9a = kosuRef === '9agustos'
+  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a
+  const kosuLabel = is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
   return (
     <>
@@ -125,7 +126,7 @@ function BasvuruForm() {
         </h1>
         <p className="hero-sub">
           {isKosu
-            ? 'Çarşamba akşamı 20.30. Buluşma noktası seçilen katılımcılarla paylaşılacak.'
+            ? 'Pazar sabah 07.30. Bu sefer rotamız şehrin içinde!          Buluşma noktası seçilen katılımcılarla paylaşılacak.'
             : 'Ankara\'dan doğan komünitenin bir parçası ol. Formu doldur, seni bekleyelim.'}
         </p>
         {isKosu && (
