@@ -10,6 +10,7 @@ function BasvuruForm() {
   const kosuRef = searchParams.get('kosu') || null
 
   const [katilimTipi, setKatilimTipi] = useState(null)
+  const [seciliKosular, setSeciliKosular] = useState([])
   const [form, setForm] = useState({
     ad_soyad: '',
     email: '',
@@ -26,23 +27,54 @@ function BasvuruForm() {
   const [error, setError] = useState('')
   const [showKvkk, setShowKvkk] = useState(false)
 
+  const isSecim = kosuRef === 'secim'
+
+  const kosular = [
+    { id: '25agustos', label: 'Rota #014 — Anıttepe Koşu Parkuru [Akşam Koşusu]', tarih: '25 Ağustos Salı', saat: '20.30' },
+    { id: '30agustos', label: 'Rota #015 — 30 Ağustos Zafer Parkı', tarih: '30 Ağustos Pazar', saat: '07.30' },
+  ]
+
+  const is12 = kosuRef === '12temmuz'
+  const is21 = kosuRef === '21haziran'
+  const is19 = kosuRef === '19temmuz'
+  const is26 = kosuRef === '26temmuz'
+  const is2a = kosuRef === '2agustos'
+  const is5a = kosuRef === '5agustos'
+  const is9a = kosuRef === '9agustos'
+  const is12a = kosuRef === '12agustos'
+  const is16a = kosuRef === '16agustos'
+  const is19a = kosuRef === '19agustos'
+  const is23a = kosuRef === '23agustos'
+  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || isSecim
+  const kosuLabel = is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
+
   function handle(e) {
     const { name, value, type, checked } = e.target
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }))
   }
 
+  function toggleKosu(id) {
+    setSeciliKosular(prev =>
+      prev.includes(id) ? prev.filter(k => k !== id) : [...prev, id]
+    )
+  }
+
   async function submit(e) {
     e.preventDefault()
     if (!form.kvkk_onay) { setError('Lütfen aydınlatma metnini onaylayın.'); return }
+    if (isSecim && seciliKosular.length === 0) { setError('Lütfen en az bir koşu seçin.'); return }
+
     setLoading(true)
     setError('')
+
+    const kosuReferans = isSecim ? seciliKosular.join(',') : kosuRef
 
     const insertData = katilimTipi === 'onceki'
       ? {
           ad_soyad: form.ad_soyad,
           telefon: form.telefon,
           kvkk_onay: form.kvkk_onay,
-          kosu_referans: kosuRef,
+          kosu_referans: kosuReferans,
           email: '',
           yas: null,
           kosu_deneyimi: 'Daha önce katıldım',
@@ -57,7 +89,7 @@ function BasvuruForm() {
           motivasyon: form.motivasyon,
           nereden_duydunuz: form.nereden_duydunuz,
           kvkk_onay: form.kvkk_onay,
-          kosu_referans: kosuRef,
+          kosu_referans: kosuReferans,
         }
 
     const { error: err } = await supabase.from('runners_applications').insert(insertData)
@@ -65,20 +97,6 @@ function BasvuruForm() {
     if (err) { setError('Bir hata oluştu, tekrar deneyin.'); return }
     setDone(true)
   }
-
-  const is12 = kosuRef === '12temmuz'
-  const is21 = kosuRef === '21haziran'
-  const is19 = kosuRef === '19temmuz'
-  const is26 = kosuRef === '26temmuz'
-  const is2a = kosuRef === '2agustos'
-  const is5a = kosuRef === '5agustos'
-  const is9a = kosuRef === '9agustos'
-  const is12a = kosuRef === '12agustos'
-  const is16a = kosuRef === '16agustos'
-  const is19a = kosuRef === '19agustos'
-  const is23a = kosuRef === '23agustos'
-  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a
-  const kosuLabel = is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
   return (
     <>
@@ -119,23 +137,27 @@ function BasvuruForm() {
 
       <div className="hero">
         <div className="hero-tag">
-          {isKosu ? `Rota · ${kosuLabel} 2026` : 'Komüniteye Katıl'}
+          {isSecim ? 'Koşu Seçimi · Ağustos 2026' : isKosu ? `Rota · ${kosuLabel} 2026` : 'Komüniteye Katıl'}
         </div>
         <h1 className="hero-title">
-          {isKosu ? (
+          {isSecim ? (
+            <>Koşunu <span className="accent">seç.</span></>
+          ) : isKosu ? (
             <>{kosuLabel} <span className="accent">Koşusu</span></>
           ) : (
             <>Başvuru <span className="accent">Formu</span></>
           )}
         </h1>
         <p className="hero-sub">
-          {isKosu
-            ? "Pazar sabahı 07.30'da buluşuyoruz! Buluşma noktası seçilen katılımcılarla paylaşılacak."
-            : 'Ankara\'dan doğan komünitenin bir parçası ol. Formu doldur, seni bekleyelim.'}
+          {isSecim
+            ? 'İki koşudan birine ya da ikisine birden başvurabilirsin.'
+            : isKosu
+            ? 'Buluşma noktası seçilen katılımcılarla paylaşılacak.'
+            : "Ankara'dan doğan komünitenin bir parçası ol."}
         </p>
-        {isKosu && (
+        {isKosu && !isSecim && (
           <p className="hero-note">
-            Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz — her koşu için sınırlı kontenjan açıyoruz. Takipte kal, başvurunu yap.
+            Komüniteyi birlikte ve sağlıklı büyütmek istiyoruz — her koşu için sınırlı kontenjan açıyoruz.
           </p>
         )}
       </div>
@@ -147,9 +169,9 @@ function BasvuruForm() {
               <span className="success-icon">⚡</span>
               <h2 className="success-title">Başvurun alındı!</h2>
               <p className="success-sub">
-                {isKosu
-                  ? 'Harika! Başvurunu aldık. Seçilen katılımcılara buluşma noktasını ileteceğiz.'
-                  : 'Harika! Başvurunu aldık, en kısa sürede seninle iletişime geçeceğiz.'
+                {isSecim && seciliKosular.length > 0
+                  ? `${seciliKosular.includes('25agustos') ? '25 Ağustos' : ''}${seciliKosular.length === 2 ? ' ve ' : ''}${seciliKosular.includes('30agustos') ? '30 Ağustos' : ''} koşusu için başvurunu aldık.`
+                  : 'Harika! Başvurunu aldık. Seçilen katılımcılara buluşma noktasını ileteceğiz.'
                 }<br/>
                 Bizi Instagram&apos;dan takip etmeyi unutma.
               </p>
@@ -157,11 +179,9 @@ function BasvuruForm() {
                 <a href="https://instagram.com/bizzatrunners" target="_blank" rel="noopener noreferrer" className="ig-link">
                   @bizzatrunners ↗
                 </a>
-                {isKosu && (
-                  <a href="https://www.strava.com/clubs/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#FC4C02',fontSize:'0.88rem',fontWeight:600,textDecoration:'none'}}>
-                    🟠 Strava kulübümüze katıl →
-                  </a>
-                )}
+                <a href="https://www.strava.com/clubs/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#FC4C02',fontSize:'0.88rem',fontWeight:600,textDecoration:'none'}}>
+                  🟠 Strava kulübümüze katıl →
+                </a>
               </div>
             </div>
           ) : (
@@ -192,6 +212,52 @@ function BasvuruForm() {
                     </button>
                   )}
 
+                  {/* KOŞU SEÇİMİ */}
+                  {isSecim && (
+                    <div className="field">
+                      <label>Hangi Koşulara Katılmak İstiyorsun?<span>*</span></label>
+                      <div style={{display:'flex',flexDirection:'column',gap:'10px',marginTop:'4px'}}>
+                                                 {kosular.map(k => (
+                          <label
+                            key={k.id}
+                            htmlFor={`kosu-${k.id}`}
+                            style={{
+                              display:'flex',gap:'14px',alignItems:'flex-start',padding:'16px',
+                              background: seciliKosular.includes(k.id) ? 'rgba(45,111,255,0.1)' : 'rgba(255,255,255,0.03)',
+                              border: `1.5px solid ${seciliKosular.includes(k.id) ? '#2D6FFF' : 'rgba(45,111,255,0.2)'}`,
+                              borderRadius:'10px',cursor:'pointer',transition:'all 0.2s'
+                            }}
+                          >
+                            <input
+                              id={`kosu-${k.id}`}
+                              type="checkbox"
+                              checked={seciliKosular.includes(k.id)}
+                              onChange={() => toggleKosu(k.id)}
+                              style={{display:'none'}}
+                            />
+                            <div style={{
+                              width:'20px',height:'20px',flexShrink:0,marginTop:'2px',
+                              borderRadius:'4px',border:`2px solid ${seciliKosular.includes(k.id) ? '#2D6FFF' : 'rgba(45,111,255,0.4)'}`,
+                              background: seciliKosular.includes(k.id) ? '#2D6FFF' : 'transparent',
+                              display:'flex',alignItems:'center',justifyContent:'center',
+                              transition:'all 0.2s',flexShrink:0
+                            }}>
+                              {seciliKosular.includes(k.id) && (
+                                <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
+                                  <path d="M1 4L4.5 7.5L11 1" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                                </svg>
+                              )}
+                            </div>
+                            <div>
+                              <div style={{fontFamily:'Poppins,sans-serif',fontWeight:700,fontSize:'0.95rem',color:'#FAF7F2',marginBottom:'4px'}}>{k.label}</div>
+                              <div style={{fontSize:'0.8rem',color:'rgba(250,247,242,0.45)'}}>{k.tarih} · {k.saat}</div>
+                            </div>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
                   {katilimTipi === 'onceki' ? (
                     <>
                       <div style={{background:'rgba(45,111,255,0.06)',border:'1px solid rgba(45,111,255,0.15)',borderRadius:'10px',padding:'12px 16px',marginBottom:'20px'}}>
@@ -220,7 +286,6 @@ function BasvuruForm() {
                           <input name="yas" type="number" value={form.yas} onChange={handle} required placeholder="Yaşın" min="10" max="99"/>
                         </div>
                       </div>
-
                       <div className="field-row">
                         <div className="field">
                           <label>E-posta<span>*</span></label>
@@ -231,7 +296,6 @@ function BasvuruForm() {
                           <input name="telefon" value={form.telefon} onChange={handle} required placeholder="05xx xxx xx xx"/>
                         </div>
                       </div>
-
                       <div className="field">
                         <label>Koşu Deneyimin<span>*</span></label>
                         <select name="kosu_deneyimi" value={form.kosu_deneyimi} onChange={handle} required>
@@ -242,7 +306,6 @@ function BasvuruForm() {
                           <option value="Yarışmalara katılıyorum">Yarışmalara katılıyorum</option>
                         </select>
                       </div>
-
                       <div className="field">
                         <label>Seni Tanıyalım<span>*</span></label>
                         <textarea
@@ -254,12 +317,10 @@ function BasvuruForm() {
                           style={{minHeight:'120px'}}
                         />
                       </div>
-
                       <div className="field">
                         <label>Katılma Motivasyonun</label>
                         <textarea name="motivasyon" value={form.motivasyon} onChange={handle} placeholder="Neden bizzat runners'a katılmak istiyorsun?"/>
                       </div>
-
                       {!isKosu && (
                         <div className="field">
                           <label>Bizi Nereden Duydun?</label>
@@ -288,7 +349,7 @@ function BasvuruForm() {
                   {error && <div className="error-msg">{error}</div>}
 
                   <button type="submit" className="submit-btn" disabled={loading}>
-                    {loading ? 'Gönderiliyor...' : isKosu ? `${kosuLabel} Koşusuna Başvur →` : 'Başvuruyu Gönder →'}
+                    {loading ? 'Gönderiliyor...' : isSecim ? 'Başvuruyu Gönder →' : isKosu ? `${kosuLabel} Koşusuna Başvur →` : 'Başvuruyu Gönder →'}
                   </button>
                 </form>
               )}
