@@ -46,8 +46,9 @@ function BasvuruForm() {
   const is19a = kosuRef === '19agustos'
   const is23a = kosuRef === '23agustos'
   const is30a = kosuRef === '30agustos'
-  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a
-  const kosuLabel = is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
+  const is2e = kosuRef === '2eylul'
+  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e
+  const kosuLabel = is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
   function handle(e) {
     const { name, value, type, checked } = e.target
