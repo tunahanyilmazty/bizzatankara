@@ -268,7 +268,7 @@ export default function RunnersPage() {
                 Başvuru Açık
               </div>
               <div className="kosu-rota">Rota #017</div>
-              <h3 className="kosu-title">Başkent Millet Bahçesi</h3>
+              <h3 className="kosu-title">30 Ağustos Zafer Parkı</h3>
               <p className="kosu-desc">Seçilen katılımcılara buluşma noktası paylaşılacak.</p>
               <div className="kosu-stats">
                 <div className="kosu-stat">
