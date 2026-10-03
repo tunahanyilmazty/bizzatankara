@@ -55,8 +55,9 @@ function BasvuruForm() {
   const is23e = kosuRef === '23eylul'
   const is27e = kosuRef === '27eylul'
   const is30e = kosuRef === '30eylul'
-  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e || is6e || is9e || is13e || is16e || is20e || is23e || is27e || is30e
-  const kosuLabel = is30e ? '30 Eylül' : is27e ? '27 Eylül' : is23e ? '23 Eylül' : is20e ? '20 Eylül' : is16e ? '16 Eylül' : is13e ? '13 Eylül' : is9e ? '9 Eylül' : is6e ? '6 Eylül' : is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
+  const is4k = kosuRef === '4ekim'
+  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e || is6e || is9e || is13e || is16e || is20e || is23e || is27e || is30e || is4k
+  const kosuLabel = is4k ? '4 Ekim' : is30e ? '30 Eylül' : is27e ? '27 Eylül' : is23e ? '23 Eylül' : is20e ? '20 Eylül' : is16e ? '16 Eylül' : is13e ? '13 Eylül' : is9e ? '9 Eylül' : is6e ? '6 Eylül' : is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
   function handle(e) {
     const { name, value, type, checked } = e.target
@@ -191,6 +192,17 @@ function BasvuruForm() {
                 </a>
                 <a href="https://www.strava.com/clubs/bizzatrunners" target="_blank" rel="noopener noreferrer" style={{display:'inline-flex',alignItems:'center',gap:'8px',color:'#FC4C02',fontSize:'0.88rem',fontWeight:600,textDecoration:'none'}}>
                   🟠 Strava kulübümüze katıl →
+                </a>
+              </div>
+              <div style={{marginTop:'28px',borderTop:'1px solid rgba(45,111,255,0.15)',paddingTop:'24px'}}>
+                <p style={{fontSize:'0.68rem',letterSpacing:'0.12em',textTransform:'uppercase',color:'rgba(250,247,242,0.25)',marginBottom:'12px'}}>İlk Tişörtümüz Çıktı</p>
+                <a href="https://badukkan.com" target="_blank" rel="noopener noreferrer" style={{display:'flex',gap:'14px',alignItems:'center',background:'rgba(255,255,255,0.04)',border:'1px solid rgba(255,255,255,0.07)',borderRadius:'12px',padding:'12px',textDecoration:'none'}}>
+                  <img src="/tisort.png" alt="bizzat runners tişört" style={{width:'72px',height:'72px',objectFit:'cover',borderRadius:'8px',flexShrink:0}}/>
+                  <div style={{textAlign:'left'}}>
+                    <div style={{fontFamily:'Poppins,sans-serif',fontWeight:700,fontSize:'0.88rem',color:'#FAF7F2',marginBottom:'4px'}}>bizzat runners — İlk Tişört</div>
+                    <div style={{fontSize:'0.75rem',color:'rgba(250,247,242,0.4)',lineHeight:1.6}}>Ankara · est. 2026</div>
+                    <div style={{fontSize:'0.75rem',color:'#2D6FFF',marginTop:'4px',fontWeight:600}}>badukkan.com&apos;dan sipariş ver →</div>
+                  </div>
                 </a>
               </div>
             </div>
