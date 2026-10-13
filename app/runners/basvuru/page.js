@@ -56,8 +56,9 @@ function BasvuruForm() {
   const is27e = kosuRef === '27eylul'
   const is30e = kosuRef === '30eylul'
   const is4k = kosuRef === '4ekim'
-  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e || is6e || is9e || is13e || is16e || is20e || is23e || is27e || is30e || is4k
-  const kosuLabel = is4k ? '4 Ekim' : is30e ? '30 Eylül' : is27e ? '27 Eylül' : is23e ? '23 Eylül' : is20e ? '20 Eylül' : is16e ? '16 Eylül' : is13e ? '13 Eylül' : is9e ? '9 Eylül' : is6e ? '6 Eylül' : is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
+  const is14k = kosuRef === '14ekim'
+  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e || is6e || is9e || is13e || is16e || is20e || is23e || is27e || is30e || is4k || is14k
+  const kosuLabel = is14k ? '14 Ekim' : is4k ? '4 Ekim' : is30e ? '30 Eylül' : is27e ? '27 Eylül' : is23e ? '23 Eylül' : is20e ? '20 Eylül' : is16e ? '16 Eylül' : is13e ? '13 Eylül' : is9e ? '9 Eylül' : is6e ? '6 Eylül' : is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
   function handle(e) {
     const { name, value, type, checked } = e.target
@@ -148,7 +149,7 @@ function BasvuruForm() {
 
       <div className="hero">
         <div className="hero-tag">
-          {isSecim ? 'Koşu Seçimi · Ağustos 2026' : isKosu ? `Rota · ${kosuLabel} 2026` : 'Komüniteye Katıl'}
+          {isSecim ? 'Koşu Seçimi · Ekim 2026' : isKosu ? `Rota · ${kosuLabel} 2026` : 'Komüniteye Katıl'}
         </div>
         <h1 className="hero-title">
           {isSecim ? (
@@ -208,9 +209,9 @@ function BasvuruForm() {
             </div>
           ) : (
             <>
-              {isKosu && !katilimTipi && (
+              {isKosu && !isSecim && !katilimTipi && (
                 <div className="katilim-secim">
-                  <h3 className="katilim-title">Daha önce bizzatrunners koşusuna katıldın mı?</h3>
+                  <h3 className="katilim-title">Daha önce bizzat runners koşusuna katıldın mı?</h3>
                   <div className="katilim-btns">
                     <button type="button" className="katilim-btn" onClick={() => setKatilimTipi('onceki')}>
                       ✓ Evet, daha önce katıldım
@@ -222,9 +223,9 @@ function BasvuruForm() {
                 </div>
               )}
 
-              {(katilimTipi || !isKosu) && (
+              {(katilimTipi || !isKosu || isSecim) && (
                 <form onSubmit={submit}>
-                  {isKosu && katilimTipi && (
+                  {isKosu && !isSecim && katilimTipi && (
                     <button
                       type="button"
                       onClick={() => { setKatilimTipi(null); setError('') }}
@@ -234,12 +235,11 @@ function BasvuruForm() {
                     </button>
                   )}
 
-                  {/* KOŞU SEÇİMİ */}
                   {isSecim && (
                     <div className="field">
                       <label>Hangi Koşulara Katılmak İstiyorsun?<span>*</span></label>
                       <div style={{display:'flex',flexDirection:'column',gap:'10px',marginTop:'4px'}}>
-                                                 {kosular.map(k => (
+                        {kosular.map(k => (
                           <label
                             key={k.id}
                             htmlFor={`kosu-${k.id}`}
@@ -262,7 +262,7 @@ function BasvuruForm() {
                               borderRadius:'4px',border:`2px solid ${seciliKosular.includes(k.id) ? '#2D6FFF' : 'rgba(45,111,255,0.4)'}`,
                               background: seciliKosular.includes(k.id) ? '#2D6FFF' : 'transparent',
                               display:'flex',alignItems:'center',justifyContent:'center',
-                              transition:'all 0.2s',flexShrink:0
+                              transition:'all 0.2s'
                             }}>
                               {seciliKosular.includes(k.id) && (
                                 <svg width="12" height="9" viewBox="0 0 12 9" fill="none">
