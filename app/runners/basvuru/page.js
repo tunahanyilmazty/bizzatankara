@@ -59,8 +59,9 @@ function BasvuruForm() {
   const is14k = kosuRef === '14ekim'
   const is21k = kosuRef === '21ekim'
   const is25k = kosuRef === '25ekim'
-  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e || is6e || is9e || is13e || is16e || is20e || is23e || is27e || is30e || is4k || is14k || is21k || is25k
-  const kosuLabel = is25k ? '25 Ekim' : is21k ? '21 Ekim' : is14k ? '14 Ekim' : is4k ? '4 Ekim' : is30e ? '30 Eylül' : is27e ? '27 Eylül' : is23e ? '23 Eylül' : is20e ? '20 Eylül' : is16e ? '16 Eylül' : is13e ? '13 Eylül' : is9e ? '9 Eylül' : is6e ? '6 Eylül' : is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
+  const is28k = kosuRef === '28ekim'
+  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e || is6e || is9e || is13e || is16e || is20e || is23e || is27e || is30e || is4k || is14k || is21k || is25k || is28k
+  const kosuLabel = is28k ? '28 Ekim' : is25k ? '25 Ekim' : is21k ? '21 Ekim' : is14k ? '14 Ekim' : is4k ? '4 Ekim' : is30e ? '30 Eylül' : is27e ? '27 Eylül' : is23e ? '23 Eylül' : is20e ? '20 Eylül' : is16e ? '16 Eylül' : is13e ? '13 Eylül' : is9e ? '9 Eylül' : is6e ? '6 Eylül' : is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null
 
   function handle(e) {
     const { name, value, type, checked } = e.target
