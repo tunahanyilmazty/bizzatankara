@@ -260,18 +260,18 @@ export default function RunnersPage() {
             Her hafta yeni bir <span className="accent">rota</span>.
           </h2>
                     <div className="kosular-grid">
-            {/* ROTA 031 */}
+                     {/* ROTA 032 */}
             <div className="kosu-card yaklasan">
               <div className="kosu-badge badge-yaklasan">
                 <span className="badge-dot"></span>
                 Başvuru Açık
               </div>
-              <div className="kosu-rota">Rota #031</div>
+              <div className="kosu-rota">Rota #032</div>
               <h3 className="kosu-title">Anıttepe Koşu Parkuru</h3>
               <p className="kosu-desc">Seçilen katılımcılara buluşma noktası paylaşılacak.</p>
               <div className="kosu-stats">
                 <div className="kosu-stat">
-                  <span className="kosu-stat-val">28 Eki</span>
+                  <span className="kosu-stat-val">4 Kas</span>
                   <span className="kosu-stat-label">Tarih</span>
                 </div>
                 <div className="kosu-stat">
@@ -288,11 +288,31 @@ export default function RunnersPage() {
                 <div className="gizli-note-dot"></div>
                 Buluşma noktası seçilen katılımcılarla paylaşılacak
               </div>
-              <a href="/runners/basvuru?kosu=28ekim" className="kosu-btn">
-                28 Ekim Koşusuna Katıl →
+              <a href="/runners/basvuru?kosu=4kasim" className="kosu-btn">
+                4 Kasım Koşusuna Katıl →
               </a>
             </div>
 
+            {/* ROTA 031 */}
+            <div className="kosu-card tamamlandi">
+              <div className="kosu-badge badge-tamamlandi">
+                <span className="badge-dot"></span>
+                Tamamlandı
+              </div>
+              <div className="kosu-rota">Rota #031</div>
+              <h3 className="kosu-title">Anıttepe Koşu Parkuru</h3>
+              <p className="kosu-desc">28 Ekim akşamı gerçekleştirilen koşumuz.</p>
+              <div className="kosu-stats">
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">28 Eki</span>
+                  <span className="kosu-stat-label">Tarih</span>
+                </div>
+                <div className="kosu-stat">
+                  <span className="kosu-stat-val">20.30</span>
+                  <span className="kosu-stat-label">Saat</span>
+                </div>
+              </div>
+            </div>
             {/* ROTA 030 */}
             <div className="kosu-card tamamlandi">
               <div className="kosu-badge badge-tamamlandi">
