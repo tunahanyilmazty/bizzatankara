@@ -33,38 +33,40 @@ function BasvuruForm() {
     { id: '25agustos', label: 'Rota #014 — Anıttepe Koşu Parkuru [Akşam Koşusu]', tarih: '25 Ağustos Salı', saat: '20.30' },
     { id: '30agustos', label: 'Rota #015 — 30 Ağustos Zafer Parkı', tarih: '30 Ağustos Pazar', saat: '07.30' },
   ]
+  const KOSULAR = {
+    '21haziran': '21 Haziran',
+    '12temmuz': '12 Temmuz',
+    '19temmuz': '19 Temmuz',
+    '26temmuz': '26 Temmuz',
+    '2agustos': '2 Ağustos',
+    '5agustos': '5 Ağustos',
+    '9agustos': '9 Ağustos',
+    '12agustos': '12 Ağustos',
+    '16agustos': '16 Ağustos',
+    '19agustos': '19 Ağustos',
+    '23agustos': '23 Ağustos',
+    '30agustos': '30 Ağustos Zafer',
+    '2eylul': '2 Eylül',
+    '6eylul': '6 Eylül',
+    '9eylul': '9 Eylül',
+    '13eylul': '13 Eylül',
+    '16eylul': '16 Eylül',
+    '20eylul': '20 Eylül',
+    '23eylul': '23 Eylül',
+    '27eylul': '27 Eylül',
+    '30eylul': '30 Eylül',
+    '4ekim': '4 Ekim',
+    '14ekim': '14 Ekim',
+    '21ekim': '21 Ekim',
+    '25ekim': '25 Ekim',
+    '28ekim': '28 Ekim',
+    '4kasim': '4 Kasım',
+    '8kasim': '8 Kasım',
+  }
+  const kosuLabel = KOSULAR[kosuRef] || null
+  const isKosu = !!kosuLabel
 
-  const is12 = kosuRef === '12temmuz'
-  const is21 = kosuRef === '21haziran'
-  const is19 = kosuRef === '19temmuz'
-  const is26 = kosuRef === '26temmuz'
-  const is2a = kosuRef === '2agustos'
-  const is5a = kosuRef === '5agustos'
-  const is9a = kosuRef === '9agustos'
-  const is12a = kosuRef === '12agustos'
-  const is16a = kosuRef === '16agustos'
-  const is19a = kosuRef === '19agustos'
-  const is23a = kosuRef === '23agustos'
-  const is30a = kosuRef === '30agustos'
-  const is2e = kosuRef === '2eylul'
-  const is6e = kosuRef === '6eylul'
-  const is9e = kosuRef === '9eylul'
-  const is13e = kosuRef === '13eylul'
-  const is16e = kosuRef === '16eylul'
-  const is20e = kosuRef === '20eylul'
-  const is23e = kosuRef === '23eylul'
-  const is27e = kosuRef === '27eylul'
-  const is30e = kosuRef === '30eylul'
-  const is4k = kosuRef === '4ekim'
-  const is14k = kosuRef === '14ekim'
-  const is21k = kosuRef === '21ekim'
-  const is25k = kosuRef === '25ekim'
-    const is28k = kosuRef === '28ekim'
-   const is28k = kosuRef === '28ekim'
-  const is4ka = kosuRef === '4kasim'
-  const is8ka = kosuRef === '8kasim'
-  const isKosu = is12 || is21 || is19 || is26 || is2a || is5a || is9a || is12a || is16a || is19a || is23a || is30a || is2e || is6e || is9e || is13e || is16e || is20e || is23e || is27e || is30e || is4k || is14k || is21k || is25k || is28k || is4ka || is8ka
-  const kosuLabel = is8ka ? '8 Kasım' : is4ka ? '4 Kasım' : is28k ? '28 Ekim' : is25k ? '25 Ekim' : is21k ? '21 Ekim' : is14k ? '14 Ekim' : is4k ? '4 Ekim' : is30e ? '30 Eylül' : is27e ? '27 Eylül' : is23e ? '23 Eylül' : is20e ? '20 Eylül' : is16e ? '16 Eylül' : is13e ? '13 Eylül' : is9e ? '9 Eylül' : is6e ? '6 Eylül' : is2e ? '2 Eylül' : is30a ? '30 Ağustos Zafer' : is23a ? '23 Ağustos' : is19a ? '19 Ağustos' : is16a ? '16 Ağustos' : is12a ? '12 Ağustos' : is9a ? '9 Ağustos' : is5a ? '5 Ağustos' : is2a ? '2 Ağustos' : is26 ? '26 Temmuz' : is19 ? '19 Temmuz' : is12 ? '12 Temmuz' : is21 ? '21 Haziran' : null  function handle(e) {
+  function handle(e) {
     const { name, value, type, checked } = e.target
     setForm(f => ({ ...f, [name]: type === 'checkbox' ? checked : value }))
   }
