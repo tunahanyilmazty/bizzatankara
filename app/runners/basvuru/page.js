@@ -62,6 +62,7 @@ function BasvuruForm() {
     '28ekim': '28 Ekim',
     '4kasim': '4 Kasım',
     '8kasim': '8 Kasım',
+    '11kasim': '11 Kasım',
   }
   const kosuLabel = KOSULAR[kosuRef] || null
   const isKosu = !!kosuLabel
